@@ -16,7 +16,6 @@
       position: relative;
     }
 
-    /* 頂部狀態控制列 */
     .control-panel {
       position: fixed;
       top: 15px;
@@ -66,7 +65,6 @@
     }
     .buttons button:active { transform: scale(0.92); }
 
-    /* 暮斯的移動容器 */
     #pet-container {
       position: absolute;
       left: 50%;
@@ -79,7 +77,6 @@
       z-index: 10;
     }
 
-    /* 像素圖銳利化呈現，保留復古像素質感 */
     #petImg {
       width: 100%;
       height: 100%;
@@ -89,7 +86,6 @@
       transform: scaleX(var(--dir, 1));
     }
 
-    /* 靜止時的可愛微幅呼吸 */
     @keyframes idleBob {
       0%, 100% { transform: scaleX(var(--dir, 1)) translateY(0); }
       50% { transform: scaleX(var(--dir, 1)) translateY(-3px); }
@@ -99,10 +95,14 @@
       animation: idleBob 1.5s infinite ease-in-out;
     }
 
-    /* 睡覺時縮小一點並加上半透明濾鏡 */
+    /* 睡覺時的微幅呼吸起伏 */
+    @keyframes sleepBreathe {
+      0%, 100% { transform: scaleX(var(--dir, 1)) scale(1); }
+      50% { transform: scaleX(var(--dir, 1)) scale(1.03); }
+    }
+
     .sleeping #petImg {
-      transform: scaleX(var(--dir, 1)) scaleY(0.88) translateY(10px);
-      opacity: 0.85;
+      animation: sleepBreathe 2.5s infinite ease-in-out;
     }
 
     .pop-emoji {
@@ -135,7 +135,6 @@
     </div>
   </div>
 
-  <!-- 像素暮斯本體 -->
   <div id="pet-container" class="idle" onclick="petAction('pet')">
     <img id="petImg" src="stand.png" alt="像素暮斯">
   </div>
@@ -162,11 +161,10 @@
     document.getElementById('happiness').innerText = happiness;
   }
 
-  // 啟動四隻小腳快速交替的像素走路動畫
   function startWalkingAnimation(speedMultiplier = 1) {
     stopWalkingAnimation();
     petContainer.className = '';
-    const frameSpeed = Math.max(110, 200 / speedMultiplier); // 跑越快腳動越快！
+    const frameSpeed = Math.max(110, 200 / speedMultiplier);
     
     walkInterval = setInterval(() => {
       walkFrame = (walkFrame + 1) % 2;
@@ -184,7 +182,6 @@
   function movePetTo(targetX, targetY, speedMultiplier = 1) {
     if (isSleeping) return;
 
-    // 走路圖原圖面朝右：往右走為 1，往左走翻轉為 -1
     if (targetX < currentX) {
       petImg.style.setProperty('--dir', '-1');
     } else {
@@ -209,7 +206,7 @@
       if (!isSleeping && !isBusy) {
         petContainer.className = 'idle';
         petImg.src = 'stand.png';
-        petImg.style.setProperty('--dir', '1'); // 站立時轉回正面眨眼
+        petImg.style.setProperty('--dir', '1');
       }
     }, duration * 1000);
   }
@@ -229,11 +226,10 @@
     setTimeout(autoWander, 3500 + Math.random() * 2500);
   }
 
-  // 點擊螢幕空白處呼喚暮斯跑過來
   document.body.addEventListener('click', (e) => {
     if (e.target.closest('.control-panel') || e.target.closest('#pet-container')) return;
     if (isSleeping) {
-      statusMsg.innerText = '暮斯正在睡覺，叫不醒牠喔～';
+      statusMsg.innerText = '暮斯正在呼呼大睡，叫不醒牠喔～';
       return;
     }
 
@@ -261,8 +257,12 @@
       stopWalkingAnimation();
       if (isSleeping) {
         petContainer.className = 'sleeping';
-        petImg.src = 'stand.png';
-        statusMsg.innerText = '暮斯趴下來打盹了... Zzz';
+        petImg.style.setProperty('--dir', '1');
+        // 隨機切換「貓貓蟲趴睡」或「縮成一團睡」
+        const isBall = Math.random() < 0.5;
+        petImg.src = isBall ? 'sleep2.png' : 'sleep1.png';
+        statusMsg.innerText = isBall ? '暮斯縮成一顆毛球睡著了... Zzz' : '暮斯變成貓貓蟲趴睡了... Zzz';
+        spawnEmoji(currentX + 60, currentY, '💤');
       } else {
         petContainer.className = 'idle';
         petImg.src = 'stand.png';
@@ -276,7 +276,7 @@
     stopWalkingAnimation();
     petContainer.className = 'idle';
     petImg.style.setProperty('--dir', '1');
-    petImg.src = 'cheer.png'; // 切換成舉雙手冒愛心的歡呼圖！
+    petImg.src = 'cheer.png';
 
     if (action === 'feed') {
       hunger = Math.min(100, hunger + 15);
