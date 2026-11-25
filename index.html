@@ -128,3 +128,193 @@
   <!-- 頂部面板 -->
   <div class="control-panel">
     <h1>🐾 暮斯的散步小窩</h1>
+    <div id="statusMsg" class="status-text">暮斯正在四處探險...</div>
+    <div class="stats">
+      <div>飽足感：<span id="hunger">80</span>%</div>
+      <div>心情值：<span id="happiness">80</span>%</div>
+    </div>
+    <div class="buttons">
+      <button onclick="petAction('feed')">🍖 餵食</button>
+      <button onclick="petAction('play')">🎾 丟球</button>
+      <button onclick="petAction('sleep')">💤 睡覺</button>
+    </div>
+  </div>
+
+  <!-- 會跑來跑去的暮斯 -->
+  <div id="pet-container" class="idle" onclick="petAction('pet')">
+    <img id="petImg" src="normal.png" alt="暮斯">
+  </div>
+
+<script>
+  const normalPhotos = ['normal.png', 'normal2.png', 'LOOK.png', 'LOOK4.png'];
+  const happyPhotos = ['HAPPY.png', 'MEOW.png'];
+  const sleepPhotos = ['SLEEP.png', 'SLEEP2.png', 'SLEEP3.png', 'LAZY.png'];
+
+  function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  let hunger = 80;
+  let happiness = 80;
+  let isSleeping = false;
+  let isBusy = false;
+
+  const petContainer = document.getElementById('pet-container');
+  const petImg = document.getElementById('petImg');
+  const statusMsg = document.getElementById('statusMsg');
+
+  let currentX = window.innerWidth / 2 - 85;
+  let currentY = window.innerHeight * 0.55;
+  petContainer.style.left = currentX + 'px';
+  petContainer.style.top = currentY + 'px';
+
+  function updateDisplay() {
+    document.getElementById('hunger').innerText = hunger;
+    document.getElementById('happiness').innerText = happiness;
+  }
+
+  function movePetTo(targetX, targetY, speedMultiplier = 1) {
+    if (isSleeping) return;
+
+    petImg.src = pickRandom(['normal.png', 'LOOK.png', 'LOOK4.png']);
+
+    if (targetX < currentX) {
+      petImg.style.setProperty('--dir', '-1');
+    } else {
+      petImg.style.setProperty('--dir', '1');
+    }
+
+    const dx = targetX - currentX;
+    const dy = targetY - currentY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const duration = Math.max(0.8, (distance / 120) / speedMultiplier);
+
+    petContainer.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+    petContainer.classList.remove('idle');
+    petContainer.classList.add('walking');
+
+    currentX = targetX;
+    currentY = targetY;
+    petContainer.style.left = currentX + 'px';
+    petContainer.style.top = currentY + 'px';
+
+    setTimeout(() => {
+      petContainer.classList.remove('walking');
+      if (!isSleeping) {
+        petContainer.classList.add('idle');
+        petImg.src = pickRandom(normalPhotos);
+      }
+    }, duration * 1000);
+  }
+
+  function autoWander() {
+    if (!isSleeping && !isBusy) {
+      const minX = 20;
+      const maxX = window.innerWidth - 190;
+      const minY = 210; 
+      const maxY = window.innerHeight - 190;
+
+      const randomX = Math.max(minX, Math.random() * maxX);
+      const randomY = Math.max(minY, Math.random() * maxY);
+
+      movePetTo(randomX, randomY, 1);
+    }
+    setTimeout(autoWander, 3500 + Math.random() * 2500);
+  }
+
+  document.body.addEventListener('click', (e) => {
+    if (e.target.closest('.control-panel') || e.target.closest('#pet-container')) return;
+    if (isSleeping) {
+      statusMsg.innerText = '暮斯正在呼呼大睡，叫不醒牠喔～';
+      return;
+    }
+
+    const targetX = Math.min(window.innerWidth - 180, Math.max(10, e.clientX - 85));
+    const targetY = Math.min(window.innerHeight - 180, Math.max(200, e.clientY - 85));
+    
+    spawnEmoji(e.clientX, e.clientY, '🐾');
+    statusMsg.innerText = '暮斯聽到呼喚跑過來了！';
+    movePetTo(targetX, targetY, 1.8);
+  });
+
+  function spawnEmoji(x, y, emoji) {
+    const el = document.createElement('div');
+    el.className = 'pop-emoji';
+    el.innerText = emoji;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+
+  function petAction(action) {
+    if (action === 'sleep') {
+      isSleeping = !isSleeping;
+      if (isSleeping) {
+        petContainer.classList.remove('walking', 'idle');
+        petImg.src = pickRandom(sleepPhotos);
+        statusMsg.innerText = '暮斯找了個舒服姿勢睡著了... Zzz';
+      } else {
+        petImg.src = pickRandom(normalPhotos);
+        petContainer.classList.add('idle');
+        statusMsg.innerText = '暮斯伸了個大懶腰醒來了！';
+      }
+      return;
+    }
+
+    isSleeping = false;
+    isBusy = true;
+    petContainer.classList.remove('walking');
+    petContainer.classList.add('idle');
+
+    if (action === 'feed') {
+      hunger = Math.min(100, hunger + 15);
+      petImg.src = 'MEOW.png';
+      statusMsg.innerText = '暮斯張大嘴巴大口吃飯！喵嗚～';
+      spawnEmoji(currentX + 70, currentY, '🍖');
+    } else if (action === 'play') {
+      happiness = Math.min(100, happiness + 15);
+      hunger = Math.max(0, hunger - 5);
+      petImg.src = 'HAPPY.png';
+      statusMsg.innerText = '你丟出球球，暮斯興奮地衝過去！';
+      spawnEmoji(currentX + 70, currentY, '🎾');
+      const rushX = Math.max(20, Math.random() * (window.innerWidth - 190));
+      const rushY = Math.max(210, Math.random() * (window.innerHeight - 190));
+      movePetTo(rushX, rushY, 2.2);
+    } else if (action === 'pet') {
+      happiness = Math.min(100, happiness + 5);
+      petImg.src = pickRandom(happyPhotos);
+      statusMsg.innerText = '你摸了摸暮斯，牠開心地翻肚肚！';
+      spawnEmoji(currentX + 70, currentY, '❤️');
+    }
+
+    updateDisplay();
+
+    setTimeout(() => {
+      if (!isSleeping) {
+        petImg.src = pickRandom(normalPhotos);
+        statusMsg.innerText = '暮斯正在四處探險...';
+      }
+      isBusy = false;
+    }, 2500);
+  }
+
+  setInterval(() => {
+    if (isSleeping) {
+      happiness = Math.min(100, happiness + 1);
+    } else {
+      hunger = Math.max(0, hunger - 2);
+      happiness = Math.max(0, happiness - 2);
+      if (hunger < 30 && !isBusy) {
+        petImg.src = 'LAZY.png';
+        statusMsg.innerText = '暮斯餓到趴在地上不動了，快餵牠！';
+      }
+    }
+    updateDisplay();
+  }, 5000);
+
+  setTimeout(autoWander, 1000);
+</script>
+
+</body>
+</html>
