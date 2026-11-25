@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>暮斯的散步小窩</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background-color: #fdf6e3;
+      background-image: radial-gradient(#e8dcc5 2px, transparent 2px);
+      background-size: 30px 30px;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 頂部狀態控制列 */
+    .control-panel {
+      position: fixed;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.92);
+      padding: 15px 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      text-align: center;
+      z-index: 100;
+      width: 90%;
+      max-width: 360px;
+    }
+
+    h1 { color: #5c4b51; margin: 0 0 8px 0; font-size: 20px; }
+    
+    .status-text {
+      font-weight: bold;
+      color: #6b9e93;
+      margin-bottom: 10px;
+      min-height: 22px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      background: #f5f5f5;
+      padding: 8px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .buttons button {
+      background-color: #f3b562;
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      margin: 2px;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.1s;
+    }
+    .buttons button:active { transform: scale(0.92); }
+
+    /* 暮斯的移動容器 */
+    #pet-container {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      width: 170px;
+      height: 170px;
+      transition: left 2.5s linear, top 2.5s linear;
+      cursor: pointer;
+      user-select: none;
+      z-index: 10;
+    }
+
+    /* 暮斯本體圖片 */
+    #petImg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+      transition: transform 0.2s;
+    }
+
+    /* 走路時的上下彈跳動畫 */
+    @keyframes waddle {
+      0%, 100% { transform: translateY(0) scaleX(var(--dir, 1)); }
+      50% { transform: translateY(-15px) scaleX(var(--dir, 1)); }
+    }
+
+    .walking #petImg {
+      animation: waddle 0.4s infinite ease-in-out;
+    }
+
+    /* 靜止時的微幅呼吸動畫 */
+    @keyframes breathe {
+      0%, 100% { transform: scale(1) scaleX(var(--dir, 1)); }
+      50% { transform: scale(1.04) scaleX(var(--dir, 1)); }
+    }
+
+    .idle #petImg {
+      animation: breathe 2s infinite ease-in-out;
+    }
+
+    /* 點擊螢幕時出現的小愛心或飼料特效 */
+    .pop-emoji {
+      position: absolute;
+      font-size: 24px;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 50;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(1.3); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部面板 -->
+  <div class="control-panel">
+    <h1>🐾 暮斯的散步小窩</h1>
