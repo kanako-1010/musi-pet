@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>暮斯的散步小窩</title>
+  <title>暮斯的骨骼機器人小窩</title>
   <style>
     body {
       font-family: "Microsoft JhengHei", sans-serif;
@@ -16,7 +16,6 @@
       position: relative;
     }
 
-    /* 頂部狀態控制列 */
     .control-panel {
       position: fixed;
       top: 15px;
@@ -66,49 +65,116 @@
     }
     .buttons button:active { transform: scale(0.92); }
 
-    /* 暮斯的移動容器 */
+    /* 暮斯的整體移動與轉向容器 */
     #pet-container {
       position: absolute;
       left: 50%;
       top: 55%;
-      width: 170px;
-      height: 170px;
+      width: 240px;
+      height: 240px;
       transition: left 2.5s linear, top 2.5s linear;
       cursor: pointer;
       user-select: none;
       z-index: 10;
     }
 
-    /* 暮斯本體圖片 */
-    #petImg {
+    #pet-flipper {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      filter: drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+      position: relative;
+      transform: scaleX(var(--dir, 1));
       transition: transform 0.2s;
     }
 
-    /* 走路時的上下彈跳動畫 */
-    @keyframes waddle {
-      0%, 100% { transform: translateY(0) scaleX(var(--dir, 1)); }
-      50% { transform: translateY(-15px) scaleX(var(--dir, 1)); }
+    /* 2D 骨骼機器人零件設定 */
+    .rig-part {
+      position: absolute;
+      object-fit: contain;
+      pointer-events: none;
     }
 
-    .walking #petImg {
-      animation: waddle 0.4s infinite ease-in-out;
+    /* 針對黑底零件加上 darken/multiply 消除黑框的臨時魔法 */
+    .black-bg-fix {
+      mix-blend-mode: darken; 
     }
 
-    /* 靜止時的微幅呼吸動畫 */
-    @keyframes breathe {
-      0%, 100% { transform: scale(1) scaleX(var(--dir, 1)); }
-      50% { transform: scale(1.04) scaleX(var(--dir, 1)); }
+    /* 1. 身體（原圖面朝右） */
+    .part-body {
+      width: 125px;
+      left: 55px;
+      top: 65px;
+      z-index: 2;
     }
 
-    .idle #petImg {
-      animation: breathe 2s infinite ease-in-out;
+    /* 2. 頭部（接在身體右上方） */
+    .part-head {
+      width: 105px;
+      left: 85px;
+      top: 10px;
+      z-index: 4;
+      transform-origin: 40% 85%;
+      border-radius: 50%;
     }
 
-    /* 點擊螢幕時出現的小愛心或飼料特效 */
+    /* 3. 前腳（接在身體下方偏右） */
+    .part-leg-front {
+      width: 65px;
+      left: 110px;
+      top: 145px;
+      z-index: 3;
+      transform-origin: 20% 30%;
+    }
+
+    /* 4. 後腳（接在身體下方偏左） */
+    .part-leg-back {
+      width: 65px;
+      left: 65px;
+      top: 150px;
+      z-index: 1;
+      transform-origin: 20% 50%;
+    }
+
+    /* 5. 尾巴（原圖朝右，翻轉朝左接在屁股後面） */
+    .part-tail {
+      width: 80px;
+      left: 5px;
+      top: 125px;
+      z-index: 1;
+      transform-origin: 85% 50%;
+    }
+
+    #fallback-img {
+      width: 170px;
+      height: 170px;
+      object-fit: contain;
+      display: none;
+    }
+
+    /* --- 走路時的骨骼連動動畫 --- */
+    .walking #pet-flipper { animation: bodyBounce 0.35s infinite alternate ease-in-out; }
+    .walking .part-head { animation: headNod 0.35s infinite alternate ease-in-out; }
+    .walking .part-leg-front { animation: walkSwingA 0.35s infinite alternate ease-in-out; }
+    .walking .part-leg-back { animation: walkSwingB 0.35s infinite alternate ease-in-out; }
+    .walking .part-tail { animation: tailWag 0.25s infinite alternate ease-in-out; }
+
+    /* --- 靜止呼吸時的骨骼微動 --- */
+    .idle .part-head { animation: headIdle 1.8s infinite alternate ease-in-out; }
+    .idle .part-tail { animation: tailWag 0.9s infinite alternate ease-in-out; }
+
+    /* --- 開心/互動時的歡呼動作 --- */
+    .excited .part-head { animation: headExcited 0.25s infinite alternate ease-in-out; }
+    .excited .part-leg-front { animation: pawWave 0.25s infinite alternate ease-in-out; }
+    .excited .part-tail { animation: tailWag 0.15s infinite alternate ease-in-out; }
+
+    @keyframes bodyBounce { 0% { transform: scaleX(var(--dir, 1)) translateY(0px); } 100% { transform: scaleX(var(--dir, 1)) translateY(-8px); } }
+    @keyframes headNod { 0% { transform: rotate(-6deg); } 100% { transform: rotate(8deg); } }
+    @keyframes headIdle { 0% { transform: rotate(-3deg); } 100% { transform: rotate(4deg); } }
+    @keyframes headExcited { 0% { transform: rotate(-12deg) translateY(-3px); } 100% { transform: rotate(12deg) translateY(0px); } }
+    @keyframes walkSwingA { 0% { transform: rotate(-25deg); } 100% { transform: rotate(25deg); } }
+    @keyframes walkSwingB { 0% { transform: rotate(25deg); } 100% { transform: rotate(-25deg); } }
+    @keyframes pawWave { 0% { transform: rotate(-10deg); } 100% { transform: rotate(-55deg); } }
+    @keyframes tailWag { 0% { transform: scaleX(-1) rotate(-15deg); } 100% { transform: scaleX(-1) rotate(20deg); } }
+
     .pop-emoji {
       position: absolute;
       font-size: 24px;
@@ -125,10 +191,9 @@
 </head>
 <body>
 
-  <!-- 頂部面板 -->
   <div class="control-panel">
-    <h1>🐾 暮斯的散步小窩</h1>
-    <div id="statusMsg" class="status-text">暮斯正在四處探險...</div>
+    <h1>🐾 暮斯的骨骼機器人小窩</h1>
+    <div id="statusMsg" class="status-text">暮斯骨骼機器人啟動完成！</div>
     <div class="stats">
       <div>飽足感：<span id="hunger">80</span>%</div>
       <div>心情值：<span id="happiness">80</span>%</div>
@@ -140,31 +205,42 @@
     </div>
   </div>
 
-  <!-- 會跑來跑去的暮斯 -->
+  <!-- 暮斯骨骼容器 -->
   <div id="pet-container" class="idle" onclick="petAction('pet')">
-    <img id="petImg" src="normal.png" alt="暮斯">
+    <div id="pet-flipper">
+      <div id="rig-parts">
+        <img class="rig-part part-tail black-bg-fix" src="tail.png" onerror="switchToFallback()">
+        <img class="rig-part part-leg-back black-bg-fix" src="leg_back.png" onerror="switchToFallback()">
+        <img class="rig-part part-body black-bg-fix" src="body.png" onerror="switchToFallback()">
+        <img class="rig-part part-leg-front black-bg-fix" src="leg_front.png" onerror="switchToFallback()">
+        <img class="rig-part part-head" src="head.png" onerror="switchToFallback()">
+      </div>
+      <img id="fallback-img" src="LOOK.png" alt="暮斯">
+    </div>
   </div>
 
 <script>
-  const normalPhotos = ['normal.png', 'normal2.png', 'LOOK.png', 'LOOK4.png'];
-  const happyPhotos = ['HAPPY.png', 'MEOW.png'];
-  const sleepPhotos = ['SLEEP.png', 'SLEEP2.png', 'SLEEP3.png', 'LAZY.png'];
-
-  function pickRandom(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-  }
-
   let hunger = 80;
   let happiness = 80;
   let isSleeping = false;
   let isBusy = false;
+  let useFallback = false;
 
   const petContainer = document.getElementById('pet-container');
-  const petImg = document.getElementById('petImg');
+  const petFlipper = document.getElementById('pet-flipper');
+  const fallbackImg = document.getElementById('fallback-img');
   const statusMsg = document.getElementById('statusMsg');
 
-  let currentX = window.innerWidth / 2 - 85;
-  let currentY = window.innerHeight * 0.55;
+  function switchToFallback() {
+    if (useFallback) return;
+    useFallback = true;
+    document.getElementById('rig-parts').style.display = 'none';
+    fallbackImg.style.display = 'block';
+    statusMsg.innerText = '找不到部分零件圖（請確認檔名為 leg_front.png）';
+  }
+
+  let currentX = window.innerWidth / 2 - 120;
+  let currentY = window.innerHeight * 0.50;
   petContainer.style.left = currentX + 'px';
   petContainer.style.top = currentY + 'px';
 
@@ -176,12 +252,11 @@
   function movePetTo(targetX, targetY, speedMultiplier = 1) {
     if (isSleeping) return;
 
-    petImg.src = pickRandom(['normal.png', 'LOOK.png', 'LOOK4.png']);
-
+    // 身體原圖朝右，往右走為 1，往左走翻轉為 -1
     if (targetX < currentX) {
-      petImg.style.setProperty('--dir', '-1');
+      petFlipper.style.setProperty('--dir', '-1');
     } else {
-      petImg.style.setProperty('--dir', '1');
+      petFlipper.style.setProperty('--dir', '1');
     }
 
     const dx = targetX - currentX;
@@ -190,8 +265,7 @@
     const duration = Math.max(0.8, (distance / 120) / speedMultiplier);
 
     petContainer.style.transition = `left ${duration}s linear, top ${duration}s linear`;
-    petContainer.classList.remove('idle');
-    petContainer.classList.add('walking');
+    petContainer.className = 'walking';
 
     currentX = targetX;
     currentY = targetY;
@@ -199,20 +273,18 @@
     petContainer.style.top = currentY + 'px';
 
     setTimeout(() => {
-      petContainer.classList.remove('walking');
-      if (!isSleeping) {
-        petContainer.classList.add('idle');
-        petImg.src = pickRandom(normalPhotos);
+      if (!isSleeping && !isBusy) {
+        petContainer.className = 'idle';
       }
     }, duration * 1000);
   }
 
   function autoWander() {
     if (!isSleeping && !isBusy) {
-      const minX = 20;
-      const maxX = window.innerWidth - 190;
-      const minY = 210; 
-      const maxY = window.innerHeight - 190;
+      const minX = 10;
+      const maxX = window.innerWidth - 240;
+      const minY = 200; 
+      const maxY = window.innerHeight - 240;
 
       const randomX = Math.max(minX, Math.random() * maxX);
       const randomY = Math.max(minY, Math.random() * maxY);
@@ -225,15 +297,15 @@
   document.body.addEventListener('click', (e) => {
     if (e.target.closest('.control-panel') || e.target.closest('#pet-container')) return;
     if (isSleeping) {
-      statusMsg.innerText = '暮斯正在呼呼大睡，叫不醒牠喔～';
+      statusMsg.innerText = '暮斯正在睡覺，叫不醒牠喔～';
       return;
     }
 
-    const targetX = Math.min(window.innerWidth - 180, Math.max(10, e.clientX - 85));
-    const targetY = Math.min(window.innerHeight - 180, Math.max(200, e.clientY - 85));
+    const targetX = Math.min(window.innerWidth - 240, Math.max(10, e.clientX - 120));
+    const targetY = Math.min(window.innerHeight - 240, Math.max(200, e.clientY - 120));
     
     spawnEmoji(e.clientX, e.clientY, '🐾');
-    statusMsg.innerText = '暮斯聽到呼喚跑過來了！';
+    statusMsg.innerText = '暮斯邁開小短腿跑過來了！';
     movePetTo(targetX, targetY, 1.8);
   });
 
@@ -251,12 +323,10 @@
     if (action === 'sleep') {
       isSleeping = !isSleeping;
       if (isSleeping) {
-        petContainer.classList.remove('walking', 'idle');
-        petImg.src = pickRandom(sleepPhotos);
-        statusMsg.innerText = '暮斯找了個舒服姿勢睡著了... Zzz';
+        petContainer.className = '';
+        statusMsg.innerText = '暮斯進入休眠模式... Zzz';
       } else {
-        petImg.src = pickRandom(normalPhotos);
-        petContainer.classList.add('idle');
+        petContainer.className = 'idle';
         statusMsg.innerText = '暮斯伸了個大懶腰醒來了！';
       }
       return;
@@ -264,36 +334,32 @@
 
     isSleeping = false;
     isBusy = true;
-    petContainer.classList.remove('walking');
-    petContainer.classList.add('idle');
+    petContainer.className = 'excited';
 
     if (action === 'feed') {
       hunger = Math.min(100, hunger + 15);
-      petImg.src = 'MEOW.png';
-      statusMsg.innerText = '暮斯張大嘴巴大口吃飯！喵嗚～';
-      spawnEmoji(currentX + 70, currentY, '🍖');
+      statusMsg.innerText = '暮斯開心地點頭大口吃飯！';
+      spawnEmoji(currentX + 100, currentY, '🍖');
     } else if (action === 'play') {
       happiness = Math.min(100, happiness + 15);
       hunger = Math.max(0, hunger - 5);
-      petImg.src = 'HAPPY.png';
-      statusMsg.innerText = '你丟出球球，暮斯興奮地衝過去！';
-      spawnEmoji(currentX + 70, currentY, '🎾');
-      const rushX = Math.max(20, Math.random() * (window.innerWidth - 190));
-      const rushY = Math.max(210, Math.random() * (window.innerHeight - 190));
+      statusMsg.innerText = '暮斯撒腿狂奔去追球球！';
+      spawnEmoji(currentX + 100, currentY, '🎾');
+      const rushX = Math.max(10, Math.random() * (window.innerWidth - 240));
+      const rushY = Math.max(200, Math.random() * (window.innerHeight - 240));
       movePetTo(rushX, rushY, 2.2);
     } else if (action === 'pet') {
       happiness = Math.min(100, happiness + 5);
-      petImg.src = pickRandom(happyPhotos);
-      statusMsg.innerText = '你摸了摸暮斯，牠開心地翻肚肚！';
-      spawnEmoji(currentX + 70, currentY, '❤️');
+      statusMsg.innerText = '你摸了摸暮斯，牠開心地揮起前爪！';
+      spawnEmoji(currentX + 100, currentY, '❤️');
     }
 
     updateDisplay();
 
     setTimeout(() => {
       if (!isSleeping) {
-        petImg.src = pickRandom(normalPhotos);
-        statusMsg.innerText = '暮斯正在四處探險...';
+        petContainer.className = 'idle';
+        statusMsg.innerText = '暮斯正在四處巡邏...';
       }
       isBusy = false;
     }, 2500);
@@ -306,8 +372,7 @@
       hunger = Math.max(0, hunger - 2);
       happiness = Math.max(0, happiness - 2);
       if (hunger < 30 && !isBusy) {
-        petImg.src = 'LAZY.png';
-        statusMsg.innerText = '暮斯餓到趴在地上不動了，快餵牠！';
+        statusMsg.innerText = '暮斯肚子餓了，快餵牠！';
       }
     }
     updateDisplay();
