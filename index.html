@@ -16,28 +16,30 @@
       position: relative;
     }
 
+    /* 頂部狀態控制列 */
     .control-panel {
       position: fixed;
       top: 15px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255, 255, 255, 0.94);
-      padding: 15px 25px;
+      padding: 15px 22px;
       border-radius: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
       text-align: center;
       z-index: 100;
-      width: 90%;
-      max-width: 360px;
+      width: 92%;
+      max-width: 390px;
     }
 
-    h1 { color: #5c4b51; margin: 0 0 8px 0; font-size: 20px; }
+    h1 { color: #5c4b51; margin: 0 0 6px 0; font-size: 20px; }
     
     .status-text {
       font-weight: bold;
       color: #6b9e93;
       margin-bottom: 10px;
       min-height: 22px;
+      font-size: 14px;
     }
 
     .stats {
@@ -47,24 +49,26 @@
       padding: 8px;
       border-radius: 10px;
       margin-bottom: 12px;
-      font-size: 14px;
+      font-size: 13px;
       color: #555;
+      font-weight: bold;
     }
 
     .buttons button {
       background-color: #f3b562;
       border: none;
       color: white;
-      padding: 8px 14px;
+      padding: 8px 13px;
       margin: 2px;
       border-radius: 10px;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
       font-weight: bold;
       transition: transform 0.1s;
     }
     .buttons button:active { transform: scale(0.92); }
 
+    /* 暮斯的移動容器 */
     #pet-container {
       position: absolute;
       left: 50%;
@@ -74,7 +78,43 @@
       transition: left 2.5s linear, top 2.5s linear;
       cursor: pointer;
       user-select: none;
-      z-index: 10;
+      z-index: 15;
+    }
+
+    /* 暮斯頭上的需求對話泡泡 */
+    #speech-bubble {
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border: 2px solid #f3b562;
+      color: #5c4b51;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: bold;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 25;
+      animation: bubblePop 0.3s ease-out;
+    }
+
+    #speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: #f3b562 transparent transparent transparent;
+    }
+
+    @keyframes bubblePop {
+      0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
+      100% { transform: translateX(-50%) scale(1); opacity: 1; }
     }
 
     #petImg {
@@ -95,7 +135,6 @@
       animation: idleBob 1.5s infinite ease-in-out;
     }
 
-    /* 睡覺時的微幅呼吸起伏 */
     @keyframes sleepBreathe {
       0%, 100% { transform: scaleX(var(--dir, 1)) scale(1); }
       50% { transform: scaleX(var(--dir, 1)) scale(1.03); }
@@ -105,17 +144,41 @@
       animation: sleepBreathe 2.5s infinite ease-in-out;
     }
 
+    /* 地上的便便樣式 */
+    .poop-item {
+      position: absolute;
+      font-size: 32px;
+      cursor: pointer;
+      user-select: none;
+      z-index: 8;
+      animation: poopDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.15));
+      transition: transform 0.15s;
+    }
+
+    .poop-item:hover {
+      transform: scale(1.25);
+    }
+
+    @keyframes poopDrop {
+      0% { transform: scale(0) translateY(-20px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+
     .pop-emoji {
       position: absolute;
-      font-size: 24px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #e07a5f;
       pointer-events: none;
-      animation: floatUp 1s ease-out forwards;
+      animation: floatUp 1.1s ease-out forwards;
       z-index: 50;
+      text-shadow: 0 2px 4px rgba(255,255,255,0.8);
     }
 
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-40px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-45px) scale(1.2); }
     }
   </style>
 </head>
@@ -125,8 +188,9 @@
     <h1>🐾 暮斯的像素小窩</h1>
     <div id="statusMsg" class="status-text">暮斯正在四處散步探險...</div>
     <div class="stats">
-      <div>飽足感：<span id="hunger">80</span>%</div>
-      <div>心情值：<span id="happiness">80</span>%</div>
+      <div>🍖 飽足：<span id="hunger">80</span>%</div>
+      <div>💖 心情：<span id="happiness">80</span>%</div>
+      <div>⭐ 積分：<span id="score">0</span></div>
     </div>
     <div class="buttons">
       <button onclick="petAction('feed')">🍖 餵食</button>
@@ -135,21 +199,27 @@
     </div>
   </div>
 
+  <!-- 像素暮斯本體 -->
   <div id="pet-container" class="idle" onclick="petAction('pet')">
+    <div id="speech-bubble">喵～</div>
     <img id="petImg" src="stand.png" alt="像素暮斯">
   </div>
 
 <script>
   let hunger = 80;
   let happiness = 80;
+  let score = 0;
   let isSleeping = false;
   let isBusy = false;
+  let wantsPet = false; // 是否正在主動討摸摸
   let walkInterval = null;
   let walkFrame = 0;
+  let poopCount = 0;
 
   const petContainer = document.getElementById('pet-container');
   const petImg = document.getElementById('petImg');
   const statusMsg = document.getElementById('statusMsg');
+  const speechBubble = document.getElementById('speech-bubble');
 
   let currentX = window.innerWidth / 2 - 75;
   let currentY = window.innerHeight * 0.55;
@@ -159,6 +229,39 @@
   function updateDisplay() {
     document.getElementById('hunger').innerText = hunger;
     document.getElementById('happiness').innerText = happiness;
+    document.getElementById('score').innerText = score;
+  }
+
+  // 顯示頭上對話氣泡
+  function showBubble(text, duration = 3000) {
+    speechBubble.innerText = text;
+    speechBubble.style.display = 'block';
+    if (duration > 0) {
+      setTimeout(() => {
+        if (!wantsPet) speechBubble.style.display = 'none';
+      }, duration);
+    }
+  }
+
+  // 瀏覽器內建可愛「喵嗚～」音效合成（免外掛音檔）
+  function playMeowSound() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      const now = ctx.currentTime;
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(780, now + 0.15);
+      osc.frequency.exponentialRampToValueAtTime(420, now + 0.45);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.45);
+    } catch (e) {}
   }
 
   function startWalkingAnimation(speedMultiplier = 1) {
@@ -179,7 +282,7 @@
     }
   }
 
-  function movePetTo(targetX, targetY, speedMultiplier = 1) {
+  function movePetTo(targetX, targetY, speedMultiplier = 1, onArrive = null) {
     if (isSleeping) return;
 
     if (targetX < currentX) {
@@ -208,57 +311,130 @@
         petImg.src = 'stand.png';
         petImg.style.setProperty('--dir', '1');
       }
+      if (onArrive) onArrive();
     }, duration * 1000);
   }
 
-  function autoWander() {
-    if (!isSleeping && !isBusy) {
-      const minX = 20;
-      const maxX = window.innerWidth - 170;
-      const minY = 200; 
-      const maxY = window.innerHeight - 170;
+  // 上廁所產生便便
+  function makePoop() {
+    if (isSleeping || poopCount >= 5) return; // 畫面上最多累積 5 坨
 
-      const randomX = Math.max(minX, Math.random() * maxX);
-      const randomY = Math.max(minY, Math.random() * maxY);
+    const poop = document.createElement('div');
+    poop.className = 'poop-item';
+    poop.innerText = '💩';
+    poop.title = '點擊清理便便 (+10分)';
+    
+    // 便便出現在暮斯屁股後方的位置
+    const poopX = Math.min(window.innerWidth - 50, Math.max(20, currentX + 55));
+    const poopY = Math.min(window.innerHeight - 50, Math.max(220, currentY + 105));
+    poop.style.left = poopX + 'px';
+    poop.style.top = poopY + 'px';
 
-      movePetTo(randomX, randomY, 1);
-    }
-    setTimeout(autoWander, 3500 + Math.random() * 2500);
+    poop.onclick = (e) => {
+      e.stopPropagation(); // 避免觸發點擊地板呼喚
+      poop.remove();
+      poopCount = Math.max(0, poopCount - 1);
+      score += 10;
+      happiness = Math.min(100, happiness + 5);
+      updateDisplay();
+      spawnEmoji(poopX, poopY - 10, '✨ +10分！');
+      statusMsg.innerText = '鏟屎官好棒！清理乾淨了 (+10分)';
+    };
+
+    document.body.appendChild(poop);
+    poopCount++;
+    showBubble('噗滋～上完廁所了 💩', 2500);
+    statusMsg.innerText = '暮斯上廁所了！快點擊便便幫忙清理～';
+
+    // 上完廁所稍微往前走開兩步，不會踩在便便上
+    const stepAwayX = Math.min(window.innerWidth - 170, Math.max(20, currentX + (Math.random() > 0.5 ? 70 : -70)));
+    movePetTo(stepAwayX, currentY, 1.2);
   }
 
+  // 主動走過來討摸摸
+  function triggerBegForPets() {
+    if (isSleeping || isBusy || wantsPet) return;
+    wantsPet = true;
+    
+    // 走到畫面正中央偏下的顯眼位置討摸
+    const centerX = window.innerWidth / 2 - 75;
+    const centerY = window.innerHeight * 0.55;
+    
+    statusMsg.innerText = '暮斯主動跑過來向你討摸摸了！快點牠～';
+    movePetTo(centerX, centerY, 1.4, () => {
+      if (wantsPet && !isSleeping) {
+        showBubble('摸摸我嘛～ ❤️', 0); // 持續顯示直到被摸
+        playMeowSound();
+      }
+    });
+  }
+
+  // 自動巡邏與隨機觸發事件（討摸摸 / 上廁所）
+  function autoWander() {
+    if (!isSleeping && !isBusy && !wantsPet) {
+      const rand = Math.random();
+      if (rand < 0.25) {
+        // 25% 機率主動走過來討摸摸
+        triggerBegForPets();
+      } else {
+        // 一般自由散步
+        const minX = 20;
+        const maxX = window.innerWidth - 170;
+        const minY = 210; 
+        const maxY = window.innerHeight - 170;
+
+        const randomX = Math.max(minX, Math.random() * maxX);
+        const randomY = Math.max(minY, Math.random() * maxY);
+
+        movePetTo(randomX, randomY, 1, () => {
+          // 走到定點後有 20% 機率想上廁所
+          if (Math.random() < 0.20) {
+            makePoop();
+          }
+        });
+      }
+    }
+    setTimeout(autoWander, 4000 + Math.random() * 2500);
+  }
+
+  // 點擊空白處呼喚暮斯
   document.body.addEventListener('click', (e) => {
-    if (e.target.closest('.control-panel') || e.target.closest('#pet-container')) return;
+    if (e.target.closest('.control-panel') || e.target.closest('#pet-container') || e.target.closest('.poop-item')) return;
     if (isSleeping) {
       statusMsg.innerText = '暮斯正在呼呼大睡，叫不醒牠喔～';
       return;
     }
 
+    wantsPet = false;
+    speechBubble.style.display = 'none';
+
     const targetX = Math.min(window.innerWidth - 160, Math.max(10, e.clientX - 75));
-    const targetY = Math.min(window.innerHeight - 160, Math.max(200, e.clientY - 75));
+    const targetY = Math.min(window.innerHeight - 160, Math.max(210, e.clientY - 75));
     
     spawnEmoji(e.clientX, e.clientY, '🐾');
     statusMsg.innerText = '暮斯邁開小短腿跑過來了！';
     movePetTo(targetX, targetY, 1.8);
   });
 
-  function spawnEmoji(x, y, emoji) {
+  function spawnEmoji(x, y, text) {
     const el = document.createElement('div');
     el.className = 'pop-emoji';
-    el.innerText = emoji;
+    el.innerText = text;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
+    setTimeout(() => el.remove(), 1100);
   }
 
   function petAction(action) {
     if (action === 'sleep') {
       isSleeping = !isSleeping;
+      wantsPet = false;
+      speechBubble.style.display = 'none';
       stopWalkingAnimation();
       if (isSleeping) {
         petContainer.className = 'sleeping';
         petImg.style.setProperty('--dir', '1');
-        // 隨機切換「貓貓蟲趴睡」或「縮成一團睡」
         const isBall = Math.random() < 0.5;
         petImg.src = isBall ? 'sleep2.png' : 'sleep1.png';
         statusMsg.innerText = isBall ? '暮斯縮成一顆毛球睡著了... Zzz' : '暮斯變成貓貓蟲趴睡了... Zzz';
@@ -280,20 +456,36 @@
 
     if (action === 'feed') {
       hunger = Math.min(100, hunger + 15);
-      statusMsg.innerText = '暮斯舉起雙手開心吃飯！喵嗚～';
-      spawnEmoji(currentX + 60, currentY, '🍖');
+      score += 5;
+      statusMsg.innerText = '暮斯舉起雙手開心吃飯！(+5分)';
+      spawnEmoji(currentX + 60, currentY, '🍖 +5');
+      // 吃飽後 4 秒有 60% 機率會想上廁所！
+      setTimeout(() => { if (Math.random() < 0.6) makePoop(); }, 4000);
     } else if (action === 'play') {
       happiness = Math.min(100, happiness + 15);
       hunger = Math.max(0, hunger - 5);
-      statusMsg.innerText = '暮斯超興奮地衝出去追球球！';
-      spawnEmoji(currentX + 60, currentY, '🎾');
+      score += 5;
+      statusMsg.innerText = '暮斯超興奮地衝出去追球球！(+5分)';
+      spawnEmoji(currentX + 60, currentY, '🎾 +5');
       const rushX = Math.max(20, Math.random() * (window.innerWidth - 170));
-      const rushY = Math.max(200, Math.random() * (window.innerHeight - 170));
+      const rushY = Math.max(210, Math.random() * (window.innerHeight - 170));
       movePetTo(rushX, rushY, 2.2);
     } else if (action === 'pet') {
-      happiness = Math.min(100, happiness + 5);
-      statusMsg.innerText = '你摸了摸暮斯，牠開心地冒出愛心！';
-      spawnEmoji(currentX + 60, currentY, '❤️');
+      if (wantsPet) {
+        // 回應牠的主動討摸摸，給予雙倍加分獎勵！
+        wantsPet = false;
+        speechBubble.style.display = 'none';
+        happiness = Math.min(100, happiness + 15);
+        score += 15;
+        statusMsg.innerText = '成功滿足暮斯的討摸需求！超開心 (+15分)';
+        spawnEmoji(currentX + 50, currentY, '💖 +15分！');
+        playMeowSound();
+      } else {
+        happiness = Math.min(100, happiness + 5);
+        score += 2;
+        statusMsg.innerText = '你摸了摸暮斯，牠開心地冒出愛心！(+2分)';
+        spawnEmoji(currentX + 60, currentY, '❤️ +2');
+      }
     }
 
     updateDisplay();
@@ -301,26 +493,36 @@
     setTimeout(() => {
       if (!isSleeping) {
         petImg.src = 'stand.png';
-        statusMsg.innerText = '暮斯正在四處散步探險...';
+        if (!wantsPet) statusMsg.innerText = '暮斯正在四處散步探險...';
       }
       isBusy = false;
     }, 2500);
   }
 
+  // 每 5 秒狀態與需求檢查
   setInterval(() => {
     if (isSleeping) {
       happiness = Math.min(100, happiness + 1);
     } else {
       hunger = Math.max(0, hunger - 2);
-      happiness = Math.max(0, happiness - 2);
-      if (hunger < 30 && !isBusy) {
+      // 地上有便便時心情掉得比較快
+      const moodDrop = 2 + poopCount;
+      happiness = Math.max(0, happiness - moodDrop);
+
+      // 心情值低於 60 時主動喵喵叫表達需求！
+      if (happiness < 60 && !isBusy && !wantsPet) {
+        showBubble('喵～喵～無聊了 😿', 2800);
+        playMeowSound();
+        statusMsg.innerText = '暮斯心情低於 60%，正在喵喵叫求關注！';
+      } else if (hunger < 30 && !isBusy && !wantsPet) {
+        showBubble('喵嗚～肚子餓了 🐟', 2800);
         statusMsg.innerText = '暮斯肚子餓了，快餵牠！';
       }
     }
     updateDisplay();
   }, 5000);
 
-  setTimeout(autoWander, 1000);
+  setTimeout(autoWander, 1200);
 </script>
 
 </body>
