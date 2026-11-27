@@ -3,316 +3,312 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>暮斯 (Mousse) 的溫馨桌面小窩 - 點陣版</title>
+  <title>暮斯 (Mousse) 的溫馨小窩</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+TC:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;600;700&family=Noto+Sans+TC:wght@500;700&display=swap" rel="stylesheet" />
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      font-family: 'DotGothic16', 'Noto Sans TC', monospace, sans-serif;
-      background-color: #f9eedc;
+      margin: 0; padding: 0; width: 100%; height: 100dvh; overflow: hidden;
+      font-family: 'Chiron GoRound TC', 'Noto Sans TC', sans-serif;
+      background: #fff4e8;
     }
-    canvas {
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
+    .card {
+      background: #fffdf9;
+      border: 2px solid #f6dcc3;
+      box-shadow: 0 6px 18px rgba(176, 112, 62, 0.16);
     }
-    .pixel-box {
-      border: 3px solid #4a2c18;
-      box-shadow: 0 4px 0 #4a2c18;
+    .soft-btn {
+      border: 2px solid #f3d3b4;
+      box-shadow: 0 3px 0 #f0c9a3;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
-    .pixel-btn {
-      border: 2px solid #4a2c18;
-      box-shadow: 0 3px 0 #4a2c18;
-      transition: transform 0.08s ease, box-shadow 0.08s ease;
-    }
-    .pixel-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 1px 0 #4a2c18;
-    }
+    .soft-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #f0c9a3; }
+    .dock-btn { transition: transform 0.12s ease, background 0.15s ease; }
+    .dock-btn:active { transform: scale(0.9); }
+    .bar { height: 9px; border-radius: 999px; overflow: hidden; }
+    .bar > div { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+
     @keyframes floatUp {
-      0% { transform: translateY(0) scale(0.9); opacity: 0; }
-      20% { opacity: 1; }
-      100% { transform: translateY(-48px) scale(1.15); opacity: 0; }
+      0% { transform: translateY(0) scale(0.8); opacity: 0; }
+      15% { opacity: 1; }
+      100% { transform: translateY(-56px) scale(1.15); opacity: 0; }
     }
-    .animate-float-up {
-      animation: floatUp 1.3s steps(8) forwards;
+    .animate-float-up { animation: floatUp 1.3s ease-out forwards; }
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      70% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
     }
-    .nice-scroll::-webkit-scrollbar {
-      width: 6px;
+    .pop-in { animation: popIn 0.32s ease-out; }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      20% { transform: rotate(-10deg) scale(1.05); }
+      40% { transform: rotate(9deg) scale(1.05); }
+      60% { transform: rotate(-6deg); }
+      80% { transform: rotate(4deg); }
     }
-    .nice-scroll::-webkit-scrollbar-thumb {
-      background: #c88a4b;
-      border-radius: 4px;
+    .wiggle { animation: wiggle 1.1s ease-in-out infinite; display: inline-block; }
+    @keyframes revealSpin {
+      0% { transform: scale(0) rotate(-180deg); }
+      70% { transform: scale(1.2) rotate(10deg); }
+      100% { transform: scale(1) rotate(0); }
     }
+    .reveal { animation: revealSpin 0.6s cubic-bezier(.2,1.4,.4,1) both; display: inline-block; }
+    .bubble-tail::after {
+      content: ''; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%);
+      border-width: 10px 9px 0; border-style: solid; border-color: #fffdf9 transparent transparent;
+      filter: drop-shadow(0 2px 0 #f6dcc3);
+    }
+    .nice-scroll::-webkit-scrollbar { width: 6px; }
+    .nice-scroll::-webkit-scrollbar-thumb { background: #f3b98a; border-radius: 4px; }
+    textarea { user-select: text; }
   </style>
 </head>
-<body class="flex flex-col justify-between relative text-[#3d2210]">
+<body class="flex flex-col justify-between relative text-[#6b4226]">
 
-  <!-- ==================== 1. TOP PIXEL HUD ==================== -->
+  <!-- ==================== 1. TOP HUD ==================== -->
   <header class="relative z-20 px-2 pt-2 sm:px-4 sm:pt-3 pointer-events-none">
     <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
 
-      <!-- Left: Mousse Info & 5 Pixel Gauges -->
-      <div class="pointer-events-auto bg-[#fffaf0]/95 px-3 py-2 rounded-2xl pixel-box flex items-center gap-2.5 sm:gap-3.5 max-w-full">
-        <!-- Mini Pixel Icon -->
-        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#f5c77e] border-2 border-[#4a2c18] flex items-center justify-center shrink-0 text-2xl shadow-inner">
-          🐱
-        </div>
+      <div class="pointer-events-auto card px-3 py-2 rounded-3xl flex items-center gap-2.5 sm:gap-3.5 max-w-full">
+        <button onclick="openPhotoViewer(0)" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#ffe7d1] ring-2 ring-[#f6c79c] overflow-hidden shrink-0" title="看暮斯的照片">
+          <img src="normal.png" alt="暮斯" class="w-full h-full object-cover" style="object-position: 50% 10%;" onerror="this.replaceWith(document.createTextNode('🐱'))" />
+        </button>
 
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-1.5">
-            <span class="font-bold text-sm sm:text-base tracking-wide">暮斯 (Mousse)</span>
-            <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded-lg bg-[#fde6bd] border border-[#8c5228] font-bold">10個月 英國長毛公貓</span>
-            <span id="hud-gift-count" class="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-[#ffedd5] border border-[#c2410c] text-[#9a3412]">🎁 0/12</span>
+            <span class="font-bold text-sm sm:text-base">暮斯 Mousse</span>
+            <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-[#ffe9d4] text-[#9a5b2e] font-bold">10個月 · 英國長毛公貓</span>
+            <span id="hud-gift-count" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#ffe4ec] text-[#be4a6e]">🎁 0/12</span>
+            <span id="hud-bug-count" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#e3f4ff] text-[#2f6f99]">🦋 0</span>
           </div>
 
-          <!-- 5 Status Bars -->
           <div class="grid grid-cols-3 sm:flex sm:items-center gap-x-2.5 gap-y-1 mt-1.5 text-[11px] font-bold">
             <div class="flex items-center gap-1" title="飽足感">
-              <span>🍖</span>
-              <div class="w-11 sm:w-14 h-2.5 bg-[#ead5b7] border border-[#4a2c18] overflow-hidden">
-                <div id="bar-hunger" class="h-full bg-[#f59e0b]" style="width: 75%"></div>
-              </div>
+              <span>🍖</span><div class="bar w-11 sm:w-14 bg-[#fdebd3]"><div id="bar-hunger" class="bg-[#f6a547]" style="width:75%"></div></div>
               <span id="txt-hunger" class="text-[10px] w-7">75%</span>
             </div>
-
             <div class="flex items-center gap-1" title="水分">
-              <span>💧</span>
-              <div class="w-11 sm:w-14 h-2.5 bg-[#dbeafe] border border-[#4a2c18] overflow-hidden">
-                <div id="bar-water" class="h-full bg-[#0284c7]" style="width: 80%"></div>
-              </div>
+              <span>💧</span><div class="bar w-11 sm:w-14 bg-[#dff0fb]"><div id="bar-water" class="bg-[#5bb8ec]" style="width:80%"></div></div>
               <span id="txt-water" class="text-[10px] w-7">80%</span>
             </div>
-
             <div class="flex items-center gap-1" title="心情">
-              <span>💕</span>
-              <div class="w-11 sm:w-14 h-2.5 bg-[#ffe4e6] border border-[#4a2c18] overflow-hidden">
-                <div id="bar-mood" class="h-full bg-[#e11d48]" style="width: 90%"></div>
-              </div>
+              <span>💕</span><div class="bar w-11 sm:w-14 bg-[#ffe4ec]"><div id="bar-mood" class="bg-[#f47a9c]" style="width:90%"></div></div>
               <span id="txt-mood" class="text-[10px] w-7">90%</span>
             </div>
-
             <div class="flex items-center gap-1" title="體力">
-              <span>⚡</span>
-              <div class="w-11 sm:w-14 h-2.5 bg-[#e0e7ff] border border-[#4a2c18] overflow-hidden">
-                <div id="bar-energy" class="h-full bg-[#4f46e5]" style="width: 85%"></div>
-              </div>
+              <span>⚡</span><div class="bar w-11 sm:w-14 bg-[#ebe8ff]"><div id="bar-energy" class="bg-[#9b8cf2]" style="width:85%"></div></div>
               <span id="txt-energy" class="text-[10px] w-7">85%</span>
             </div>
-
-            <div class="flex items-center gap-1" title="便意（滿格會自己去砂盆）">
-              <span>💩</span>
-              <div class="w-11 sm:w-14 h-2.5 bg-[#fef3c7] border border-[#4a2c18] overflow-hidden">
-                <div id="bar-poop" class="h-full bg-[#92400e]" style="width: 25%"></div>
-              </div>
+            <div class="flex items-center gap-1" title="便意（滿了會自己去砂盆）">
+              <span>💩</span><div class="bar w-11 sm:w-14 bg-[#f8ecd9]"><div id="bar-poop" class="bg-[#c08552]" style="width:25%"></div></div>
               <span id="txt-poop" class="text-[10px] w-7">25%</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right: Litter Status + Sound + Reset -->
       <div class="pointer-events-auto flex items-center gap-1.5 sm:gap-2">
-        <button onclick="scoopLitterBox()" id="hud-litter-pill" class="pixel-btn bg-[#ecfdf5] hover:bg-[#d1fae5] px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#065f46] flex items-center gap-1" title="點擊鏟屎">
-          <span>✨</span>
-          <span id="txt-clean">砂盆乾淨</span>
+        <button onclick="scoopLitterBox()" id="hud-litter-pill" class="soft-btn bg-[#eafaf3] px-2.5 py-1.5 rounded-full text-xs font-bold text-[#2f7a5c] flex items-center gap-1" title="點擊鏟屎">
+          <span>✨</span><span id="txt-clean">砂盆乾淨</span>
         </button>
-
-        <button onclick="toggleSound()" id="btn-sound" class="pixel-btn bg-[#fffaf0] hover:bg-[#fde6bd] px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1">
-          <span id="icon-sound">🔊</span>
-          <span id="lbl-sound" class="hidden md:inline">音效開</span>
+        <button onclick="openRecordModal()" class="soft-btn bg-[#fffdf9] px-2.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1" title="成長紀錄與備份">
+          <span>📒</span><span class="hidden md:inline">紀錄</span>
         </button>
-
-        <button onclick="openResetConfirm()" class="pixel-btn bg-[#fffaf0] hover:bg-[#ffe4e6] w-8 h-8 rounded-xl text-xs font-bold flex items-center justify-center" title="重置進度">
-          ↺
+        <button onclick="toggleSound()" class="soft-btn bg-[#fffdf9] px-2.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+          <span id="icon-sound">🔊</span><span id="lbl-sound" class="hidden md:inline">音效開</span>
         </button>
+        <button onclick="openResetConfirm()" class="soft-btn bg-[#fffdf9] w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center" title="重置進度">↺</button>
       </div>
     </div>
   </header>
 
-  <!-- ==================== 2. CENTRAL PIXEL ROOM STAGE ==================== -->
+  <!-- ==================== 2. ROOM STAGE ==================== -->
   <main id="room-stage" class="relative flex-1 w-full overflow-hidden cursor-pointer">
     <canvas id="room-canvas" class="block w-full h-full"></canvas>
 
-    <!-- Pixel Speech Bubble -->
-    <div id="speech-bubble" class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full transition-opacity duration-200" style="left: 50%; top: 42%;">
-      <div class="bg-[#fffdf7] px-3 py-1.5 rounded-xl pixel-box text-xs sm:text-sm font-bold whitespace-nowrap max-w-[90vw] truncate">
-        <span id="bubble-text">呼嚕嚕～滑過頭頂摸摸暮斯，或點地板丟毛線球吧！</span>
+    <div id="speech-bubble" class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full transition-opacity duration-200" style="left:50%; top:42%;">
+      <div class="relative bubble-tail bg-[#fffdf9] px-3.5 py-1.5 rounded-2xl border-2 border-[#f6dcc3] shadow-md text-xs sm:text-sm font-bold whitespace-nowrap max-w-[90vw] truncate mb-2">
+        <span id="bubble-text">呼嚕嚕～摸摸暮斯的頭，或點地板丟毛線球吧！</span>
       </div>
-      <div class="w-3 h-3 bg-[#fffdf7] border-r-3 border-b-3 border-[#4a2c18] rotate-45 mx-auto -mt-1.5"></div>
     </div>
 
-    <!-- Japanese Karaoke Overlay Card -->
-    <div id="karaoke-card" class="hidden absolute top-2 left-1/2 -translate-x-1/2 z-20 w-[94%] max-w-md bg-[#1e1b2e]/95 text-white rounded-2xl p-3 sm:p-3.5 border-3 border-[#f472b6] shadow-2xl">
+    <div id="karaoke-card" class="hidden absolute top-2 left-1/2 -translate-x-1/2 z-20 w-[94%] max-w-md bg-[#3b2a4a]/95 text-white rounded-3xl p-3 sm:p-3.5 border-2 border-[#f9a8d4] shadow-2xl">
       <div class="flex items-center justify-between gap-1.5 pb-2 border-b border-white/20">
-        <span class="text-xs font-bold text-[#f9a8d4]">🎤 日K包廂 LIVE</span>
+        <span class="text-xs font-bold text-[#f9a8d4]">🎤 日K包廂</span>
         <div class="flex items-center gap-1">
-          <button onclick="selectSong(0)" id="song-btn-0" class="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-[#ec4899] text-white">① 貓咪進行曲</button>
-          <button onclick="selectSong(1)" id="song-btn-1" class="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 text-pink-100">② 魚乾之戀</button>
-          <button onclick="selectSong(2)" id="song-btn-2" class="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 text-pink-100">③ 午睡搖籃曲</button>
+          <button onclick="selectSong(0)" id="song-btn-0" class="text-[11px] font-bold px-2 py-0.5 rounded-full">① 貓咪進行曲</button>
+          <button onclick="selectSong(1)" id="song-btn-1" class="text-[11px] font-bold px-2 py-0.5 rounded-full">② 魚乾之戀</button>
+          <button onclick="selectSong(2)" id="song-btn-2" class="text-[11px] font-bold px-2 py-0.5 rounded-full">③ 午睡搖籃曲</button>
         </div>
-        <button onclick="stopKaraoke()" class="w-6 h-6 rounded-lg bg-white/15 hover:bg-rose-500 text-xs font-bold">✕</button>
+        <button onclick="stopKaraoke()" class="w-6 h-6 rounded-full bg-white/15 hover:bg-rose-400 text-xs font-bold">✕</button>
       </div>
       <div class="mt-2 text-center space-y-0.5">
-        <div id="lyric-jp" class="text-sm sm:text-base font-bold text-[#fde047]">にゃんにゃん♪ 黄金のモフモフ王様！</div>
-        <div id="lyric-romaji" class="text-[11px] text-[#fbcfe8]">Nyan nyan♪ Ougon no mofumofu ousama!</div>
-        <div id="lyric-zh" class="text-xs text-slate-300">喵喵♪ 黃金蓬鬆毛毛小國王！</div>
+        <div id="lyric-jp" class="text-sm sm:text-base font-bold text-[#fde68a]"></div>
+        <div id="lyric-romaji" class="text-[11px] text-[#fbcfe8]"></div>
+        <div id="lyric-zh" class="text-xs text-slate-200"></div>
       </div>
     </div>
 
-    <!-- Walk Adventure Banner -->
-    <div id="walk-banner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-[#134e4a]/95 text-white px-4 py-2.5 rounded-2xl border-3 border-[#5eead4] shadow-xl flex items-center gap-3">
+    <div id="walk-banner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-[#e6faf4] text-[#24624f] px-4 py-2.5 rounded-3xl border-2 border-[#a7e3cf] shadow-lg flex items-center gap-3">
       <span class="text-2xl animate-bounce">🐾</span>
       <div>
-        <div class="text-xs sm:text-sm font-bold text-[#ccfbf1]">暮斯正在外面散步探險中...</div>
-        <div class="text-[11px] text-[#99f6e4]">預計 <span id="walk-countdown" class="font-bold text-[#fde047]">8</span> 秒後帶禮物回家</div>
+        <div class="text-xs sm:text-sm font-bold">暮斯正在外面散步探險中…</div>
+        <div class="text-[11px]">大約 <span id="walk-countdown" class="font-bold text-[#e0750f]">8</span> 秒後帶禮物回家</div>
       </div>
-      <button onclick="recallFromWalk()" class="pixel-btn px-2.5 py-1 rounded-xl bg-[#fbbf24] text-[#3d2210] font-bold text-xs">
-        呼喚回來
-      </button>
+      <button onclick="recallFromWalk()" class="soft-btn px-2.5 py-1 rounded-full bg-[#ffe08a] text-[#6b4226] font-bold text-xs">呼喚回來</button>
     </div>
 
-    <!-- Particle Container -->
     <div id="particle-layer" class="pointer-events-none absolute inset-0 overflow-hidden z-10"></div>
   </main>
 
-  <!-- ==================== 3. BOTTOM PIXEL ACTION DOCK ==================== -->
-  <footer class="relative z-20 px-2 pb-2.5 pt-1 sm:px-4 sm:pb-3.5 bg-[#e6c297]">
-    <div class="max-w-3xl mx-auto bg-[#fffaf0] px-1.5 sm:px-2.5 py-1.5 rounded-2xl pixel-box grid grid-cols-8 gap-1">
-      <button onclick="openFeedModal()" class="flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#fde6bd] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">🍖</span>
-        <span class="text-[10px] sm:text-xs font-bold mt-0.5">餵飯</span>
-      </button>
-
-      <button onclick="refillWater()" class="flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#e0f2fe] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">💧</span>
-        <span class="text-[10px] sm:text-xs font-bold mt-0.5">加水</span>
-      </button>
-
-      <button onclick="scoopLitterBox()" class="relative flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#d1fae5] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">🧹</span>
-        <span class="text-[10px] sm:text-xs font-bold mt-0.5">鏟屎</span>
-        <span id="dock-poop-badge" class="hidden absolute top-1 right-2 w-2.5 h-2.5 rounded-full bg-[#92400e] ring-2 ring-white animate-bounce"></span>
-      </button>
-
-      <button onclick="toggleKaraoke()" class="flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#fce7f3] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">🎤</span>
-        <span class="text-[10px] sm:text-xs font-bold mt-0.5">唱日K</span>
-      </button>
-
-      <button onclick="throwBallCenter()" class="flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#ffe4e6] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">🧶</span>
-        <span class="text-[10px] sm:text-xs font-bold mt-0.5">丟球</span>
-      </button>
-
-      <button onclick="startWalk()" class="flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#ccfbf1] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">🐾</span>
-        <span class="text-[10px] sm:text-xs font-bold mt-0.5">散步</span>
-      </button>
-
-      <button onclick="openGiftModal()" class="relative flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#ffedd5] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">🎁</span>
-        <span class="text-[10px] sm:text-xs font-bold mt-0.5">禮物櫃</span>
-        <span id="dock-gift-badge" class="hidden absolute top-1 right-2 w-2.5 h-2.5 rounded-full bg-[#e11d48] ring-2 ring-white"></span>
-      </button>
-
-      <button onclick="toggleSleep()" class="flex flex-col items-center justify-center py-1 rounded-xl hover:bg-[#e0e7ff] active:translate-y-0.5 transition">
-        <span class="text-lg sm:text-xl">💤</span>
-        <span id="lbl-sleep" class="text-[10px] sm:text-xs font-bold mt-0.5">睡覺</span>
-      </button>
+  <!-- ==================== 3. BOTTOM DOCK ==================== -->
+  <footer class="relative z-20 px-2 pb-2.5 pt-1 sm:px-4 sm:pb-3.5 bg-[#f3d2ae]">
+    <div class="max-w-3xl mx-auto card px-1.5 sm:px-2.5 py-1.5 rounded-3xl grid grid-cols-8 gap-1">
+      <button onclick="openFeedModal()" class="dock-btn flex flex-col items-center py-1 rounded-2xl hover:bg-[#fff1dc]"><span class="text-lg sm:text-xl">🍖</span><span class="text-[10px] sm:text-xs font-bold mt-0.5">餵飯</span></button>
+      <button onclick="refillWater()" class="dock-btn flex flex-col items-center py-1 rounded-2xl hover:bg-[#e3f4ff]"><span class="text-lg sm:text-xl">💧</span><span class="text-[10px] sm:text-xs font-bold mt-0.5">加水</span></button>
+      <button onclick="scoopLitterBox()" class="dock-btn relative flex flex-col items-center py-1 rounded-2xl hover:bg-[#e6faf2]"><span class="text-lg sm:text-xl">🧹</span><span class="text-[10px] sm:text-xs font-bold mt-0.5">鏟屎</span>
+        <span id="dock-poop-badge" class="hidden absolute top-1 right-2 w-2.5 h-2.5 rounded-full bg-[#c08552] ring-2 ring-white animate-bounce"></span></button>
+      <button onclick="toggleKaraoke()" class="dock-btn flex flex-col items-center py-1 rounded-2xl hover:bg-[#ffe9f2]"><span class="text-lg sm:text-xl">🎤</span><span class="text-[10px] sm:text-xs font-bold mt-0.5">唱日K</span></button>
+      <button onclick="throwBallCenter()" class="dock-btn flex flex-col items-center py-1 rounded-2xl hover:bg-[#ffe4ec]"><span class="text-lg sm:text-xl">🧶</span><span class="text-[10px] sm:text-xs font-bold mt-0.5">丟球</span></button>
+      <button onclick="startWalk()" class="dock-btn flex flex-col items-center py-1 rounded-2xl hover:bg-[#e3faf4]"><span class="text-lg sm:text-xl">🐾</span><span class="text-[10px] sm:text-xs font-bold mt-0.5">散步</span></button>
+      <button onclick="openGiftModal()" class="dock-btn relative flex flex-col items-center py-1 rounded-2xl hover:bg-[#fff0de]"><span class="text-lg sm:text-xl">🎁</span><span class="text-[10px] sm:text-xs font-bold mt-0.5">禮物櫃</span>
+        <span id="dock-gift-badge" class="hidden absolute top-1 right-2 w-2.5 h-2.5 rounded-full bg-[#f43f5e] ring-2 ring-white"></span></button>
+      <button onclick="toggleSleep()" class="dock-btn flex flex-col items-center py-1 rounded-2xl hover:bg-[#efedff]"><span class="text-lg sm:text-xl">💤</span><span id="lbl-sleep" class="text-[10px] sm:text-xs font-bold mt-0.5">睡覺</span></button>
     </div>
   </footer>
 
-  <!-- ==================== 4. PIXEL MODALS ==================== -->
-  <!-- Feed Modal -->
-  <div id="modal-feed" class="hidden fixed inset-0 z-40 bg-black/45 flex items-end sm:items-center justify-center p-4" onclick="if(event.target===this) closeFeedModal()">
-    <div class="bg-[#fffaf0] w-full max-w-sm rounded-2xl p-4 pixel-box mb-16 sm:mb-0">
-      <div class="flex items-center justify-between pb-2.5 border-b-2 border-[#e6c297]">
+  <!-- ==================== 4. MODALS ==================== -->
+  <!-- Feed -->
+  <div id="modal-feed" class="hidden fixed inset-0 z-40 bg-black/35 flex items-end sm:items-center justify-center p-4" onclick="if(event.target===this) closeFeedModal()">
+    <div class="card w-full max-w-sm rounded-3xl p-4 mb-16 sm:mb-0 pop-in">
+      <div class="flex items-center justify-between pb-2.5 border-b-2 border-dashed border-[#f6dcc3]">
         <h2 class="text-base font-bold">🍖 幫暮斯準備餐點</h2>
-        <button onclick="closeFeedModal()" class="pixel-btn w-7 h-7 rounded-lg bg-[#fde6bd] text-xs font-bold">✕</button>
+        <button onclick="closeFeedModal()" class="w-7 h-7 rounded-full bg-[#ffe9d4] text-xs font-bold">✕</button>
       </div>
       <div class="mt-3 space-y-2.5">
-        <button onclick="feedMousse('kibble10')" class="pixel-btn w-full flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-[#fef3c7] text-left">
-          <div class="flex items-center gap-2.5">
-            <span class="text-2xl">🥣</span>
-            <div>
-              <div class="text-sm font-bold">乾飼料 10g</div>
-              <div class="text-[11px] text-[#78350f]">日常點心餐（飽足 +18% · 便意 +22%）</div>
-            </div>
-          </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-lg bg-[#fde6bd] border border-[#4a2c18]">餵食</span>
+        <button onclick="feedMousse('kibble10')" class="soft-btn w-full flex items-center justify-between p-2.5 rounded-2xl bg-white hover:bg-[#fff6e6] text-left">
+          <div class="flex items-center gap-2.5"><span class="text-2xl">🥣</span>
+            <div><div class="text-sm font-bold">乾飼料 10g</div><div class="text-[11px] text-[#a0663a]">日常點心餐（飽足 +18% · 便意 +22%）</div></div></div>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#ffe9d4]">餵食</span>
         </button>
-
-        <button onclick="feedMousse('kibble20')" class="pixel-btn w-full flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-[#fef3c7] text-left">
-          <div class="flex items-center gap-2.5">
-            <span class="text-2xl">🍲</span>
-            <div>
-              <div class="text-sm font-bold">乾飼料 20g</div>
-              <div class="text-[11px] text-[#78350f]">早晚主餐份量（飽足 +32% · 便意 +35%）</div>
-            </div>
-          </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-lg bg-[#fde6bd] border border-[#4a2c18]">餵食</span>
+        <button onclick="feedMousse('kibble20')" class="soft-btn w-full flex items-center justify-between p-2.5 rounded-2xl bg-white hover:bg-[#fff6e6] text-left">
+          <div class="flex items-center gap-2.5"><span class="text-2xl">🍲</span>
+            <div><div class="text-sm font-bold">乾飼料 20g</div><div class="text-[11px] text-[#a0663a]">早晚主餐份量（飽足 +32% · 便意 +35%）</div></div></div>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#ffe9d4]">餵食</span>
         </button>
-
-        <button onclick="feedMousse('wet')" class="pixel-btn w-full flex items-center justify-between p-2.5 rounded-xl bg-[#fff1f2] hover:bg-[#ffe4e6] text-left">
-          <div class="flex items-center gap-2.5">
-            <span class="text-2xl">🥫</span>
-            <div>
-              <div class="text-sm font-bold text-[#881337]">假日主食餐包 / 罐頭</div>
-              <div class="text-[11px] text-[#9f1239]">補水＋排毛滿分（飽足 +40% · 水分 +24% · 心情 +12%）</div>
-            </div>
-          </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-lg bg-[#fb7185] text-white border border-[#4a2c18]">開罐</span>
+        <button onclick="feedMousse('wet')" class="soft-btn w-full flex items-center justify-between p-2.5 rounded-2xl bg-[#fff1f4] hover:bg-[#ffe4ec] text-left">
+          <div class="flex items-center gap-2.5"><span class="text-2xl">🥫</span>
+            <div><div class="text-sm font-bold text-[#b23a62]">假日主食餐包 / 罐頭</div><div class="text-[11px] text-[#c0577b]">補水＋排毛（飽足 +40% · 水分 +24% · 心情 +12%）</div></div></div>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#f47a9c] text-white">開罐</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Gift Gallery Modal -->
-  <div id="modal-gifts" class="hidden fixed inset-0 z-40 bg-black/45 flex items-center justify-center p-4" onclick="if(event.target===this) closeGiftModal()">
-    <div class="bg-[#fffaf0] w-full max-w-md rounded-2xl p-4 pixel-box max-h-[82dvh] flex flex-col">
-      <div class="flex items-center justify-between pb-2.5 border-b-2 border-[#e6c297] shrink-0">
-        <div>
-          <h2 class="text-base font-bold">🎁 暮斯的散步紀念品櫃</h2>
-          <p class="text-[11px] text-[#78350f]">帶暮斯出門散步，他會叼回專屬小禮物送給你喔！</p>
-        </div>
-        <button onclick="closeGiftModal()" class="pixel-btn w-7 h-7 rounded-lg bg-[#fde6bd] text-xs font-bold">✕</button>
+  <!-- Gift cabinet -->
+  <div id="modal-gifts" class="hidden fixed inset-0 z-40 bg-black/35 flex items-center justify-center p-4" onclick="if(event.target===this) closeGiftModal()">
+    <div class="card w-full max-w-md rounded-3xl p-4 max-h-[82dvh] flex flex-col pop-in">
+      <div class="flex items-center justify-between pb-2.5 border-b-2 border-dashed border-[#f6dcc3] shrink-0">
+        <div><h2 class="text-base font-bold">🎁 暮斯的散步紀念品櫃</h2>
+          <p class="text-[11px] text-[#a0663a]">帶暮斯出門散步，他會叼回小禮物送給你喔！</p></div>
+        <button onclick="closeGiftModal()" class="w-7 h-7 rounded-full bg-[#ffe9d4] text-xs font-bold">✕</button>
       </div>
       <div id="gift-grid" class="grid grid-cols-3 gap-2 mt-3 overflow-y-auto nice-scroll pr-1"></div>
     </div>
   </div>
 
-  <!-- Reset Confirm Modal -->
-  <div id="modal-reset" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onclick="if(event.target===this) closeResetConfirm()">
-    <div class="bg-[#fffaf0] w-full max-w-xs rounded-2xl p-4 pixel-box text-center">
-      <div class="text-3xl mb-1.5">🐱</div>
-      <h3 class="text-base font-bold">要重置暮斯的小窩紀錄嗎？</h3>
-      <p class="text-xs text-[#78350f] mt-1">這會將飽足感、水分、便意、砂盆與禮物櫃恢復到初始狀態。</p>
+  <!-- Gift: ask before opening -->
+  <div id="modal-gift-ask" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+    <div class="card w-full max-w-xs rounded-3xl p-5 text-center pop-in">
+      <div class="text-6xl mb-2"><span class="wiggle">🎁</span></div>
+      <h3 class="text-base font-bold">暮斯散步回來了！</h3>
+      <p class="text-xs text-[#a0663a] mt-1">嘴裡叼著一個神秘小禮物，<br />眼睛亮晶晶地看著你…要收下嗎？</p>
       <div class="flex gap-2 mt-4">
-        <button onclick="closeResetConfirm()" class="pixel-btn flex-1 py-1.5 rounded-xl bg-[#fde6bd] font-bold text-xs">取消</button>
-        <button onclick="executeReset()" class="pixel-btn flex-1 py-1.5 rounded-xl bg-[#f43f5e] text-white font-bold text-xs">確定重置</button>
+        <button onclick="answerGift(false)" class="soft-btn flex-1 py-2 rounded-full bg-[#f5ede4] font-bold text-xs">先不要</button>
+        <button onclick="answerGift(true)" class="soft-btn flex-1 py-2 rounded-full bg-[#f47a9c] text-white font-bold text-xs" style="border-color:#f47a9c;box-shadow:0 3px 0 #d95c80;">收下禮物 💕</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 5. PIXEL SPRITE ENGINE & GAME LOGIC ==================== -->
+  <!-- Gift: reveal -->
+  <div id="modal-gift-reveal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onclick="if(event.target===this) closeGiftReveal()">
+    <div class="card w-full max-w-xs rounded-3xl p-5 text-center pop-in">
+      <div id="reveal-tag" class="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#fff0b3] text-[#9a6a00]">✨ 新收藏！</div>
+      <div class="text-7xl my-3"><span id="reveal-icon" class="reveal">🍀</span></div>
+      <h3 id="reveal-name" class="text-lg font-bold">四葉幸運草</h3>
+      <p id="reveal-desc" class="text-xs text-[#a0663a] mt-1 leading-relaxed"></p>
+      <button onclick="closeGiftReveal()" class="soft-btn mt-4 w-full py-2 rounded-full bg-[#ffe08a] font-bold text-xs">放進禮物櫃</button>
+    </div>
+  </div>
+
+  <!-- Photo viewer -->
+  <div id="modal-photo" class="hidden fixed inset-0 z-50 bg-black/45 flex items-center justify-center p-4" onclick="if(event.target===this) closePhotoViewer()">
+    <div class="card w-full max-w-sm rounded-3xl p-4 text-center pop-in">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-bold">📷 暮斯本人</span>
+        <button onclick="closePhotoViewer()" class="w-7 h-7 rounded-full bg-[#ffe9d4] text-xs font-bold">✕</button>
+      </div>
+      <div class="rounded-2xl bg-gradient-to-b from-[#fff1e3] to-[#ffe4ec] p-2">
+        <img id="photo-img" src="" alt="暮斯照片" class="mx-auto max-h-[55dvh] w-auto object-contain" />
+      </div>
+      <p id="photo-cap" class="text-sm font-bold mt-2"></p>
+      <div class="flex items-center justify-between mt-2">
+        <button onclick="stepPhoto(-1)" class="soft-btn px-3 py-1 rounded-full bg-white text-xs font-bold">◀ 上一張</button>
+        <span id="photo-idx" class="text-[11px] text-[#a0663a]">1 / 7</span>
+        <button onclick="stepPhoto(1)" class="soft-btn px-3 py-1 rounded-full bg-white text-xs font-bold">下一張 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record & backup -->
+  <div id="modal-record" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onclick="if(event.target===this) closeRecordModal()">
+    <div class="card w-full max-w-md rounded-3xl p-4 max-h-[86dvh] flex flex-col pop-in">
+      <div class="flex items-center justify-between pb-2.5 border-b-2 border-dashed border-[#f6dcc3] shrink-0">
+        <div><h2 class="text-base font-bold">📒 暮斯成長紀錄</h2>
+          <p class="text-[11px] text-[#a0663a]">進度會自動存在這個瀏覽器裡，關掉再開也還在喔</p></div>
+        <button onclick="closeRecordModal()" class="w-7 h-7 rounded-full bg-[#ffe9d4] text-xs font-bold">✕</button>
+      </div>
+      <div class="overflow-y-auto nice-scroll pr-1 mt-3">
+        <div id="record-days" class="text-center text-sm font-bold bg-[#fff1e3] rounded-2xl py-2"></div>
+        <div id="record-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2"></div>
+        <div class="mt-3 text-xs font-bold">🦋 捉蟲圖鑑</div>
+        <div id="record-bugs" class="grid grid-cols-3 gap-2 mt-1.5"></div>
+
+        <div class="mt-4 p-3 rounded-2xl bg-[#f3f9ff] border-2 border-[#d7ebfb]">
+          <div class="text-xs font-bold">💾 備份 / 換裝置</div>
+          <p class="text-[11px] text-[#5a7a93] mt-0.5">換手機或電腦時：在舊裝置按「複製進度碼」，到新裝置貼上後按「匯入」。</p>
+          <textarea id="backup-text" rows="3" class="w-full mt-2 p-2 rounded-xl border-2 border-[#d7ebfb] text-[11px] font-mono bg-white" placeholder="進度碼會出現在這裡，或把進度碼貼在這裡"></textarea>
+          <div class="flex gap-2 mt-2">
+            <button onclick="exportProgress()" class="soft-btn flex-1 py-1.5 rounded-full bg-white font-bold text-xs">複製進度碼</button>
+            <button onclick="importProgress()" class="soft-btn flex-1 py-1.5 rounded-full bg-[#5bb8ec] text-white font-bold text-xs" style="border-color:#5bb8ec;box-shadow:0 3px 0 #3d9bd0;">匯入</button>
+          </div>
+          <div id="backup-msg" class="text-[11px] font-bold mt-1.5 text-[#2f7a5c] min-h-[1em]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset -->
+  <div id="modal-reset" class="hidden fixed inset-0 z-50 bg-black/45 flex items-center justify-center p-4" onclick="if(event.target===this) closeResetConfirm()">
+    <div class="card w-full max-w-xs rounded-3xl p-4 text-center pop-in">
+      <div class="text-3xl mb-1.5">🐱</div>
+      <h3 class="text-base font-bold">要重置暮斯的小窩紀錄嗎？</h3>
+      <p class="text-xs text-[#a0663a] mt-1">狀態、禮物櫃、成長紀錄都會清空，無法復原喔。<br />建議先到「📒 紀錄」複製進度碼備份。</p>
+      <div class="flex gap-2 mt-4">
+        <button onclick="closeResetConfirm()" class="soft-btn flex-1 py-1.5 rounded-full bg-[#ffe9d4] font-bold text-xs">取消</button>
+        <button onclick="executeReset()" class="soft-btn flex-1 py-1.5 rounded-full bg-[#f43f5e] text-white font-bold text-xs" style="border-color:#f43f5e;box-shadow:0 3px 0 #c92a48;">確定重置</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    /**
-     * ============================================================================
-     * A. WEB AUDIO SYNTHESIZER (RETRO PIXEL MEOWS, PURRS, CRUNCHES & MELODY)
-     * ============================================================================
-     */
+    /* ==========================================================================
+     * A. AUDIO (Web Audio, no files needed)
+     * ========================================================================== */
     let audioCtx = null;
     let soundOn = true;
 
@@ -321,19 +317,31 @@
         const AC = window.AudioContext || window.webkitAudioContext;
         if (AC) audioCtx = new AC();
       }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
     }
 
     function toggleSound() {
       soundOn = !soundOn;
       document.getElementById('icon-sound').textContent = soundOn ? '🔊' : '🔇';
       document.getElementById('lbl-sound').textContent = soundOn ? '音效開' : '靜音';
-      if (soundOn) {
+      if (soundOn) { initAudio(); playMeow(540, 0.22, 0.12); }
+    }
+
+    function tone(type, f0, f1, dur, vol) {
+      if (!soundOn) return;
+      try {
         initAudio();
-        playMeow(540, 0.22, 0.12);
-      }
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(f0, now);
+        osc.frequency.exponentialRampToValueAtTime(f1, now + dur * 0.9);
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + dur + 0.02);
+      } catch (e) {}
     }
 
     function playMeow(baseFreq = 520, duration = 0.32, volume = 0.12) {
@@ -347,15 +355,11 @@
         osc.frequency.setValueAtTime(baseFreq * 0.85, now);
         osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.32, now + duration * 0.32);
         osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.72, now + duration);
-
         gain.gain.setValueAtTime(0.001, now);
         gain.gain.linearRampToValueAtTime(volume, now + 0.04);
         gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + duration + 0.02);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + duration + 0.02);
       } catch (e) {}
     }
 
@@ -369,48 +373,23 @@
         const lfoGain = audioCtx.createGain();
         const filter = audioCtx.createBiquadFilter();
         const gain = audioCtx.createGain();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(28, now);
-        lfo.type = 'sine';
-        lfo.frequency.setValueAtTime(26, now);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(28, now);
+        lfo.type = 'sine'; lfo.frequency.setValueAtTime(26, now);
         lfoGain.gain.setValueAtTime(0.045, now);
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(160, now);
-
+        filter.type = 'lowpass'; filter.frequency.setValueAtTime(160, now);
         gain.gain.setValueAtTime(0.001, now);
         gain.gain.linearRampToValueAtTime(0.09, now + 0.12);
         gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-        lfo.connect(lfoGain);
-        lfoGain.connect(gain.gain);
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        lfo.start(now);
-        osc.stop(now + duration + 0.02);
-        lfo.stop(now + duration + 0.02);
+        lfo.connect(lfoGain); lfoGain.connect(gain.gain);
+        osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); lfo.start(now);
+        osc.stop(now + duration + 0.02); lfo.stop(now + duration + 0.02);
       } catch (e) {}
     }
 
     function playCrunch(isDrink = false) {
-      if (!soundOn) return;
-      try {
-        initAudio();
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = isDrink ? 'sine' : 'square';
-        osc.frequency.setValueAtTime(isDrink ? 620 : 300 + Math.random() * 140, now);
-        osc.frequency.exponentialRampToValueAtTime(isDrink ? 960 : 150, now + 0.07);
-        gain.gain.setValueAtTime(0.06, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.09);
-      } catch (e) {}
+      if (isDrink) tone('sine', 620, 960, 0.08, 0.06);
+      else tone('square', 300 + Math.random() * 140, 150, 0.08, 0.05);
     }
 
     function playDigNoise() {
@@ -424,88 +403,37 @@
         const src = audioCtx.createBufferSource();
         src.buffer = buf;
         const filter = audioCtx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 1800;
-        const gain = audioCtx.createGain();
-        gain.gain.value = 0.08;
-        src.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioCtx.destination);
+        filter.type = 'bandpass'; filter.frequency.value = 1800;
+        const gain = audioCtx.createGain(); gain.gain.value = 0.08;
+        src.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
         src.start();
       } catch (e) {}
     }
 
-    function playBounce(intensity = 0.6) {
-      if (!soundOn) return;
-      try {
-        initAudio();
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(200 + intensity * 180, now);
-        osc.frequency.exponentialRampToValueAtTime(90, now + 0.09);
-        gain.gain.setValueAtTime(0.07 * intensity, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.11);
-      } catch (e) {}
-    }
+    function playBounce(intensity = 0.6) { tone('sine', 220 + intensity * 200, 110, 0.12, 0.08 * intensity); }
 
     function playChime() {
-      if (!soundOn) return;
-      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-        setTimeout(() => {
-          try {
-            initAudio();
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, now);
-            gain.gain.setValueAtTime(0.09, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(now);
-            osc.stop(now + 0.25);
-          } catch (e) {}
-        }, idx * 80);
-      });
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => setTimeout(() => tone('triangle', f, f, 0.24, 0.09), i * 80));
     }
 
-    /**
-     * ============================================================================
-     * B. DATA: JAPANESE KARAOKE & 12 COLLECTIBLE SOUVENIRS
-     * ============================================================================
-     */
+    function playPop() { tone('sine', 500, 1200, 0.12, 0.08); }
+
+    /* ==========================================================================
+     * B. DATA
+     * ========================================================================== */
     const KARAOKE_SONGS = [
-      {
-        notes: [523, 587, 659, 523, 659, 698, 784, 659],
-        lines: [
-          { jp: 'にゃんにゃん♪ 黄金のモフモフ王様！', romaji: 'Nyan nyan♪ Ougon no mofumofu ousama!', zh: '喵喵♪ 黃金蓬鬆毛毛小國王！' },
-          { jp: 'しっぽをふりふり お部屋をパトロール〜', romaji: 'Shippo wo furifuri oheya wo patorooru~', zh: '搖搖蓬鬆大尾巴 巡邏溫馨小房間～' },
-          { jp: 'カリカリ食べて 元気いっぱいだにゃ！', romaji: 'Karikari tabete genki ippai da nya!', zh: '吃飽香脆乾乾 活力滿滿一百分喵！' }
-        ]
-      },
-      {
-        notes: [659, 784, 880, 784, 659, 587, 523, 587],
-        lines: [
-          { jp: 'お魚くわえた 夢を見るにゃん〜', romaji: 'Osakana kuwaeta yume wo miru nyan~', zh: '夢見嘴裡叼著香噴噴小魚乾喵～' },
-          { jp: 'チュールも大好き もっとちょうだい！', romaji: 'Chuuru mo daisuki motto choudai!', zh: '肉泥跟主食罐也最喜歡 再多給一點嘛！' },
-          { jp: '飼い主さんのそばが 一番しあわせにゃ♪', romaji: 'Kainushisan no soba ga ichiban shiawase nya♪', zh: '待在奴才身邊 就是最幸福的事喵♪' }
-        ]
-      },
-      {
-        notes: [440, 523, 587, 523, 493, 440, 392, 440],
-        lines: [
-          { jp: 'ぽかぽかお日さま フローリングの上〜', romaji: 'Pokapoka ohisama furooringu no ue~', zh: '暖洋洋的太陽光 灑在木頭地板上～' },
-          { jp: 'とろけるバターみたいに ぺったんこにゃ…', romaji: 'Torokeru bataa mitai ni pettanko nya...', zh: '像融化的奶油一樣 整隻平貼在地上喵…' },
-          { jp: 'ゴロゴロ喉鳴らし おやすみなさい💤', romaji: 'Gorogoro nodo narashi oyasuminasai💤', zh: '呼嚕嚕唱著晚安曲 祝你好夢喔💤' }
-        ]
-      }
+      { notes: [523, 587, 659, 523, 659, 698, 784, 659], lines: [
+        { jp: 'にゃんにゃん♪ 黄金のモフモフ王様！', romaji: 'Nyan nyan♪ Ougon no mofumofu ousama!', zh: '喵喵♪ 黃金蓬鬆毛毛小國王！' },
+        { jp: 'しっぽをふりふり お部屋をパトロール〜', romaji: 'Shippo wo furifuri oheya wo patorooru~', zh: '搖搖蓬鬆大尾巴 巡邏溫馨小房間～' },
+        { jp: 'カリカリ食べて 元気いっぱいだにゃ！', romaji: 'Karikari tabete genki ippai da nya!', zh: '吃飽香脆乾乾 活力滿滿一百分喵！' } ] },
+      { notes: [659, 784, 880, 784, 659, 587, 523, 587], lines: [
+        { jp: 'お魚くわえた 夢を見るにゃん〜', romaji: 'Osakana kuwaeta yume wo miru nyan~', zh: '夢見嘴裡叼著香噴噴小魚乾喵～' },
+        { jp: 'チュールも大好き もっとちょうだい！', romaji: 'Chuuru mo daisuki motto choudai!', zh: '肉泥跟主食罐也最喜歡 再多給一點嘛！' },
+        { jp: '飼い主さんのそばが 一番しあわせにゃ♪', romaji: 'Kainushisan no soba ga ichiban shiawase nya♪', zh: '待在你身邊 就是最幸福的事喵♪' } ] },
+      { notes: [440, 523, 587, 523, 493, 440, 392, 440], lines: [
+        { jp: 'ぽかぽかお日さま フローリングの上〜', romaji: 'Pokapoka ohisama furooringu no ue~', zh: '暖洋洋的太陽光 灑在木頭地板上～' },
+        { jp: 'とろけるバターみたいに ぺったんこにゃ…', romaji: 'Torokeru bataa mitai ni pettanko nya...', zh: '像融化的奶油一樣 整隻平貼在地上喵…' },
+        { jp: 'ゴロゴロ喉鳴らし おやすみなさい💤', romaji: 'Gorogoro nodo narashi oyasuminasai💤', zh: '呼嚕嚕唱著晚安曲 祝你好夢喔💤' } ] }
     ];
 
     const SOUVENIR_CATALOG = [
@@ -523,172 +451,193 @@
       { id: 'crown', icon: '👑', name: '英長小王子皇冠', desc: '散步集滿好運才遇見的傳說級皇冠，獻給最棒的飼主！' }
     ];
 
-    /**
-     * ============================================================================
+    // Real photos of Mousse (cut-out PNGs in the same folder). crop = visible box [x, y, w, h]
+    const PHOTOS = [
+      { file: 'normal.png',  crop: [0, 38, 375, 567],  cap: '乖乖坐好的暮斯' },
+      { file: 'LOOK.png',    crop: [0, 195, 274, 419], cap: '歪頭看著你' },
+      { file: 'MEOW.png',    crop: [0, 177, 282, 208], cap: '喵～在叫你喔' },
+      { file: 'LOOK4.png',   crop: [19, 182, 356, 341], cap: '趴在椅子上發呆' },
+      { file: 'HAPPY.png',   crop: [0, 223, 375, 443], cap: '翻肚肚伸懶腰' },
+      { file: 'normal2.png', crop: [0, 202, 350, 347], cap: '躺著看鏡頭' },
+      { file: 'SLEEP3.png',  crop: [0, 208, 375, 458], cap: '舉手手睡覺' },
+      { file: 'LAZY.png',    crop: [17, 86, 449, 122], cap: '融化成一灘暮斯', noWall: true },
+      { file: 'SLEEP.png',   crop: [85, 260, 271, 97], cap: '瞇眼打瞌睡', noWall: true }
+    ];
+
+    const BUG_TYPES = [
+      { id: 'butterfly', name: '小蝴蝶', emoji: '🦋', speed: 70, weight: 5 },
+      { id: 'ladybug', name: '小瓢蟲', emoji: '🐞', speed: 60, weight: 3 },
+      { id: 'dragonfly', name: '小蜻蜓', emoji: '🪰', speed: 105, weight: 2 }
+    ];
+    const BUTTERFLY_COLORS = [
+      ['#f9a8d4', '#fde2ef'], ['#93c5fd', '#dbeafe'], ['#fcd34d', '#fff3c4'], ['#c4b5fd', '#ede9fe']
+    ];
+
+    /* ==========================================================================
      * C. STATE & PERSISTENCE
-     * ============================================================================
-     */
+     * ========================================================================== */
+    const SAVE_KEY = 'mousse_v4';
+    const LEGACY_KEY = 'mousse_pixel_v3';
     const canvas = document.getElementById('room-canvas');
     const ctx = canvas.getContext('2d');
-    let stageW = 800;
-    let stageH = 500;
+    let stageW = 800, stageH = 500;
 
-    const state = {
-      hunger: 75,
-      hydration: 80,
-      mood: 90,
-      energy: 85,
-      bladder: 25,
-      poopCount: 0,
-      fountainWater: 0.85,
-      bowlFood: 0,
-      bowlType: null,
-      unlockedGifts: [],
-      hasNewGift: false
-    };
+    const freshState = () => ({
+      hunger: 75, hydration: 80, mood: 90, energy: 85, bladder: 25,
+      poopCount: 0, fountainWater: 0.85, bowlFood: 0, bowlType: null,
+      unlockedGifts: [], hasNewGift: false
+    });
+    const freshRecord = () => ({
+      since: Date.now(), feeds: 0, waters: 0, pets: 0, balls: 0, walks: 0,
+      giftsAccepted: 0, giftsDeclined: 0, scoops: 0, songs: 0, pounces: 0,
+      bugs: { butterfly: 0, ladybug: 0, dragonfly: 0 }
+    });
+
+    const state = freshState();
+    let rec = freshRecord();
 
     const mousse = {
-      x: 400,
-      y: 360,
-      targetX: 400,
-      targetY: 360,
-      facing: 1,
-      mode: 'idle',
-      sleepStyle: 1, // 1 = sploot melted butter (sleep1.jpg), 2 = curled cinnamon roll (sleep2.jpg)
-      timer: 0,
-      tick: 0,
-      time: 0,
-      walkPhase: 0,
-      tailPhase: 0,
-      blinkTimer: 2.5,
-      isBlinking: false,
-      happyEyes: 0,
-      carryingBall: false,
-      carryingGift: null,
-      bubbleTime: 4.5
+      x: 400, y: 360, targetX: 400, targetY: 360, facing: 1, mode: 'idle',
+      sleepStyle: 1, timer: 0, tick: 0, time: 0, walkPhase: 0, tailPhase: 0,
+      happyEyes: 0, carryingBall: false, carryingGift: null, bubbleTime: 4.5,
+      pounceChecked: false, huntTime: 0
     };
 
     const ball = { active: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, spin: 0 };
     const karaoke = { active: false, songIdx: 0, lineIdx: 0, noteIdx: 0, noteTimer: 0, lineTimer: 0 };
     const walkAdventure = { remaining: 0, timerAccum: 0 };
+    let pendingGift = null;
+    let bug = null;
+    let nextBugIn = 12 + Math.random() * 10;
+    let huntCooldown = 0;
+
+    function applySave(d) {
+      ['hunger', 'hydration', 'mood', 'energy', 'bladder', 'poopCount', 'fountainWater'].forEach(k => {
+        if (typeof d[k] === 'number' && isFinite(d[k])) state[k] = d[k];
+      });
+      if (Array.isArray(d.unlockedGifts)) state.unlockedGifts = d.unlockedGifts.filter(id => SOUVENIR_CATALOG.some(g => g.id === id));
+      state.hasNewGift = !!d.hasNewGift;
+      if (d.rec && typeof d.rec === 'object') {
+        const base = freshRecord();
+        rec = Object.assign(base, d.rec);
+        rec.bugs = Object.assign(freshRecord().bugs, d.rec.bugs || {});
+      }
+    }
 
     function loadSavedData() {
+      let raw = null;
+      try { raw = localStorage.getItem(SAVE_KEY) || localStorage.getItem(LEGACY_KEY); } catch (e) {}
+      if (!raw) return 0;
+      let awayMin = 0;
       try {
-        const raw = localStorage.getItem('mousse_pixel_v3');
-        if (!raw) return;
         const d = JSON.parse(raw);
-        if (typeof d.hunger === 'number') state.hunger = d.hunger;
-        if (typeof d.hydration === 'number') state.hydration = d.hydration;
-        if (typeof d.mood === 'number') state.mood = d.mood;
-        if (typeof d.energy === 'number') state.energy = d.energy;
-        if (typeof d.bladder === 'number') state.bladder = d.bladder;
-        if (typeof d.poopCount === 'number') state.poopCount = d.poopCount;
-        if (typeof d.fountainWater === 'number') state.fountainWater = d.fountainWater;
-        if (Array.isArray(d.unlockedGifts)) state.unlockedGifts = d.unlockedGifts;
+        applySave(d);
+        if (typeof d.lastSeen === 'number') {
+          awayMin = Math.max(0, (Date.now() - d.lastSeen) / 60000);
+          // Gentle time-passing while you were away (max 12 hours counted)
+          const h = Math.min(awayMin / 60, 12);
+          state.hunger = Math.max(10, state.hunger - h * 6);
+          state.hydration = Math.max(10, state.hydration - h * 5);
+          state.mood = Math.max(25, state.mood - h * 3);
+          state.energy = Math.min(100, state.energy + h * 8);
+          state.bladder = Math.min(74, state.bladder + h * 6);
+        }
       } catch (e) {}
+      return awayMin;
+    }
+
+    function buildSavePayload() {
+      return {
+        v: 4,
+        hunger: Math.round(state.hunger), hydration: Math.round(state.hydration),
+        mood: Math.round(state.mood), energy: Math.round(state.energy),
+        bladder: Math.round(state.bladder), poopCount: state.poopCount,
+        fountainWater: Number(state.fountainWater.toFixed(2)),
+        unlockedGifts: state.unlockedGifts, hasNewGift: state.hasNewGift,
+        rec, lastSeen: Date.now()
+      };
     }
 
     function saveData() {
-      try {
-        localStorage.setItem('mousse_pixel_v3', JSON.stringify({
-          hunger: Math.round(state.hunger),
-          hydration: Math.round(state.hydration),
-          mood: Math.round(state.mood),
-          energy: Math.round(state.energy),
-          bladder: Math.round(state.bladder),
-          poopCount: state.poopCount,
-          fountainWater: Number(state.fountainWater.toFixed(2)),
-          unlockedGifts: state.unlockedGifts
-        }));
-      } catch (e) {}
+      try { localStorage.setItem(SAVE_KEY, JSON.stringify(buildSavePayload())); } catch (e) {}
     }
+    setInterval(saveData, 5000);
+    window.addEventListener('pagehide', saveData);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) saveData(); });
 
     function openResetConfirm() { document.getElementById('modal-reset').classList.remove('hidden'); }
     function closeResetConfirm() { document.getElementById('modal-reset').classList.add('hidden'); }
 
     function executeReset() {
-      localStorage.removeItem('mousse_pixel_v3');
-      state.hunger = 75;
-      state.hydration = 80;
-      state.mood = 90;
-      state.energy = 85;
-      state.bladder = 25;
-      state.poopCount = 0;
-      state.fountainWater = 0.85;
-      state.bowlFood = 0;
-      state.unlockedGifts = [];
-      state.hasNewGift = false;
+      try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(LEGACY_KEY); } catch (e) {}
+      Object.assign(state, freshState());
+      rec = freshRecord();
       mousse.mode = 'idle';
       mousse.x = stageW * 0.5;
       mousse.y = getFloorLineY() + 46;
+      mousse.carryingGift = null;
+      pendingGift = null;
       ball.active = false;
+      bug = null;
       stopKaraoke();
       closeResetConfirm();
+      saveData();
       refreshHudUI();
-      setSpeech('像素小窩整理好啦！重新陪伴暮斯每一天 🐾', 3.5);
+      setSpeech('小窩整理好啦！重新陪伴暮斯每一天 🐾', 3.5);
     }
 
-    /**
-     * ============================================================================
-     * D. UI & PARTICLE HELPERS
-     * ============================================================================
-     */
+    /* ==========================================================================
+     * D. UI HELPERS
+     * ========================================================================== */
+    let lastHudKey = '';
     function refreshHudUI() {
-      const h = Math.round(state.hunger);
-      const w = Math.round(state.hydration);
-      const m = Math.round(state.mood);
-      const e = Math.round(state.energy);
-      const p = Math.round(state.bladder);
+      const v = [state.hunger, state.hydration, state.mood, state.energy, state.bladder].map(n => Math.round(n));
+      const key = v.join(',') + '|' + state.poopCount + '|' + state.unlockedGifts.length + '|' + state.hasNewGift + '|' + mousse.mode + '|' + totalBugs();
+      if (key === lastHudKey) return;
+      lastHudKey = key;
 
-      document.getElementById('bar-hunger').style.width = h + '%';
-      document.getElementById('txt-hunger').textContent = h + '%';
-      document.getElementById('bar-water').style.width = w + '%';
-      document.getElementById('txt-water').textContent = w + '%';
-      document.getElementById('bar-mood').style.width = m + '%';
-      document.getElementById('txt-mood').textContent = m + '%';
-      document.getElementById('bar-energy').style.width = e + '%';
-      document.getElementById('txt-energy').textContent = e + '%';
-      document.getElementById('bar-poop').style.width = p + '%';
-      document.getElementById('txt-poop').textContent = p + '%';
+      const ids = ['hunger', 'water', 'mood', 'energy', 'poop'];
+      ids.forEach((id, i) => {
+        document.getElementById('bar-' + id).style.width = v[i] + '%';
+        document.getElementById('txt-' + id).textContent = v[i] + '%';
+      });
 
       document.getElementById('hud-gift-count').textContent = `🎁 ${state.unlockedGifts.length}/${SOUVENIR_CATALOG.length}`;
+      document.getElementById('hud-bug-count').textContent = `🦋 ${totalBugs()}`;
 
-      const cleanPill = document.getElementById('hud-litter-pill');
-      const cleanTxt = document.getElementById('txt-clean');
-      const poopBadge = document.getElementById('dock-poop-badge');
+      const pill = document.getElementById('hud-litter-pill');
+      const txt = document.getElementById('txt-clean');
+      const badge = document.getElementById('dock-poop-badge');
       if (state.poopCount === 0) {
-        cleanTxt.textContent = '砂盆乾淨';
-        cleanPill.className = 'pixel-btn bg-[#ecfdf5] hover:bg-[#d1fae5] px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#065f46] flex items-center gap-1';
-        poopBadge.classList.add('hidden');
+        txt.textContent = '砂盆乾淨';
+        pill.style.background = '#eafaf3'; pill.style.color = '#2f7a5c';
+        badge.classList.add('hidden');
       } else {
-        cleanTxt.textContent = `待鏟屎(${state.poopCount})`;
-        cleanPill.className = 'pixel-btn bg-[#fef3c7] hover:bg-[#fde68a] px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#92400e] flex items-center gap-1';
-        poopBadge.classList.remove('hidden');
+        txt.textContent = `待鏟屎(${state.poopCount})`;
+        pill.style.background = '#fff4d6'; pill.style.color = '#9a5b2e';
+        badge.classList.remove('hidden');
       }
-
-      const giftBadge = document.getElementById('dock-gift-badge');
-      if (state.hasNewGift) giftBadge.classList.remove('hidden');
-      else giftBadge.classList.add('hidden');
-
+      document.getElementById('dock-gift-badge').classList.toggle('hidden', !state.hasNewGift);
       document.getElementById('lbl-sleep').textContent = mousse.mode === 'sleeping' ? '叫醒' : '睡覺';
     }
 
+    function totalBugs() { return Object.values(rec.bugs).reduce((a, b) => a + b, 0); }
+
     function setSpeech(text, duration = 3.2) {
       mousse.bubbleTime = duration;
-      const el = document.getElementById('speech-bubble');
       document.getElementById('bubble-text').textContent = text;
-      el.style.opacity = mousse.mode === 'away' ? '0' : '1';
+      document.getElementById('speech-bubble').style.opacity = mousse.mode === 'away' ? '0' : '1';
     }
 
     function spawnFloatingEmoji(emoji, x, y) {
       const layer = document.getElementById('particle-layer');
       const span = document.createElement('span');
       span.textContent = emoji;
-      span.className = 'absolute text-lg sm:text-xl animate-float-up select-none';
+      span.className = 'absolute text-lg sm:text-xl animate-float-up';
       span.style.left = `${x}px`;
       span.style.top = `${y}px`;
       layer.appendChild(span);
-      setTimeout(() => { if (span.parentNode) span.parentNode.removeChild(span); }, 1300);
+      setTimeout(() => span.remove(), 1300);
     }
 
     function getFloorLineY() { return Math.round(stageH * 0.56); }
@@ -704,58 +653,53 @@
       };
     }
 
+    function getWindowRect() {
+      const fy = getFloorLineY();
+      return {
+        x: Math.max(22, stageW * 0.07), y: Math.max(16, fy * 0.13),
+        w: Math.min(140, stageW * 0.24), h: Math.min(124, fy * 0.55)
+      };
+    }
+
     function resizeStage() {
-      const stageEl = document.getElementById('room-stage');
-      const rect = stageEl.getBoundingClientRect();
+      const rect = document.getElementById('room-stage').getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       stageW = Math.max(320, rect.width);
       stageH = Math.max(320, rect.height);
       canvas.width = Math.floor(stageW * dpr);
       canvas.height = Math.floor(stageH * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.imageSmoothingEnabled = false;
-
-      const minY = getFloorLineY() + 26;
-      const maxY = stageH - 36;
-      if (mousse.y < minY || mousse.y > maxY) {
-        mousse.y = Math.min(maxY, Math.max(minY, getFloorLineY() + 46));
-      }
+      const minY = getFloorLineY() + 26, maxY = stageH - 36;
+      if (mousse.y < minY || mousse.y > maxY) mousse.y = Math.min(maxY, Math.max(minY, getFloorLineY() + 46));
       mousse.x = Math.min(stageW - 60, Math.max(60, mousse.x));
     }
     window.addEventListener('resize', resizeStage);
 
-    /**
-     * ============================================================================
-     * E. INTERACTIVE ACTIONS
-     * ============================================================================
-     */
+    function isBusyOutside() { return mousse.mode === 'walking_out' || mousse.mode === 'away' || mousse.mode === 'returning_gift' || pendingGift; }
+
+    /* ==========================================================================
+     * E. CARE ACTIONS
+     * ========================================================================== */
     function openFeedModal() {
-      if (mousse.mode === 'walking_out' || mousse.mode === 'away') {
-        setSpeech('暮斯正在外面散步，等他回來再放飯喔！', 2.6);
-        return;
-      }
+      if (isBusyOutside()) { setSpeech('暮斯正在外面散步，等他回來再放飯喔！', 2.6); return; }
       document.getElementById('modal-feed').classList.remove('hidden');
     }
     function closeFeedModal() { document.getElementById('modal-feed').classList.add('hidden'); }
 
     function feedMousse(type) {
       closeFeedModal();
-      if (mousse.mode === 'walking_out' || mousse.mode === 'away') return;
+      if (isBusyOutside()) return;
       if (karaoke.active) stopKaraoke();
-
       initAudio();
       ball.active = false;
       mousse.carryingBall = false;
-      mousse.carryingGift = null;
       state.bowlType = type;
       state.bowlFood = 1.0;
-
+      rec.feeds++;
       const props = getPropsCoords();
       mousse.mode = 'going_eat';
       mousse.targetX = props.food.x + 54;
       mousse.targetY = props.food.y - 2;
-      mousse.happyEyes = 0;
-
       const names = { kibble10: '乾飼料 10g', kibble20: '乾飼料 20g', wet: '假日主食餐包' };
       setSpeech(`哇～有${names[type]}！暮斯小跑去吃飯飯囉喵！`, 3.2);
       playMeow(580, 0.25, 0.12);
@@ -765,13 +709,11 @@
     function refillWater() {
       initAudio();
       state.fountainWater = 1.0;
+      rec.waters++;
       const props = getPropsCoords();
-      for (let i = 0; i < 4; i++) {
-        spawnFloatingEmoji('💧', props.water.x + (Math.random() - 0.5) * 32, props.water.y - 34);
-      }
+      for (let i = 0; i < 4; i++) spawnFloatingEmoji('💧', props.water.x + (Math.random() - 0.5) * 32, props.water.y - 34);
       playBounce(0.45);
       saveData();
-
       if (mousse.mode === 'idle' || mousse.mode === 'sleeping') {
         if (karaoke.active) stopKaraoke();
         mousse.mode = 'going_drink';
@@ -785,7 +727,7 @@
     }
 
     function triggerLitterVisit() {
-      if (mousse.mode === 'walking_out' || mousse.mode === 'away') return;
+      if (isBusyOutside()) return;
       if (karaoke.active) stopKaraoke();
       const props = getPropsCoords();
       mousse.mode = 'going_litter';
@@ -804,24 +746,17 @@
       }
       state.poopCount = 0;
       state.mood = Math.min(100, state.mood + 8);
-      playDigNoise();
-      playChime();
-      saveData();
-      refreshHudUI();
-      for (let i = 0; i < 6; i++) {
-        spawnFloatingEmoji('✨', props.litter.x + (Math.random() - 0.5) * 70, props.litter.y - 30);
-      }
+      rec.scoops++;
+      playDigNoise(); playChime();
+      saveData(); refreshHudUI();
+      for (let i = 0; i < 6; i++) spawnFloatingEmoji('✨', props.litter.x + (Math.random() - 0.5) * 70, props.litter.y - 30);
       setSpeech('貓砂盆鏟乾淨啦！暮斯開心地舉起雙手露肉球！💕', 3.4);
     }
 
     function toggleSleep() {
-      if (mousse.mode === 'walking_out' || mousse.mode === 'away') {
-        setSpeech('暮斯還在外面散步，等他回家再睡覺喔！', 2.5);
-        return;
-      }
+      if (isBusyOutside()) { setSpeech('暮斯還在外面散步，等他回家再睡覺喔！', 2.5); return; }
       if (mousse.mode === 'sleeping') {
         mousse.mode = 'idle';
-        mousse.happyEyes = 0;
         playMeow(500, 0.25, 0.12);
         setSpeech('伸個大懶腰～暮斯睡飽醒來囉！', 2.8);
       } else {
@@ -830,28 +765,18 @@
         mousse.carryingBall = false;
         mousse.sleepStyle = mousse.sleepStyle === 1 ? 2 : 1;
         mousse.mode = 'sleeping';
-        mousse.happyEyes = 1;
         playPurr(1.1);
-        setSpeech(
-          mousse.sleepStyle === 1
-            ? '呼嚕嚕…暮斯像奶油一樣融化貼在木地板上睡著了 💤'
-            : '呼嚕嚕…暮斯捲成一顆蓬鬆金色肉桂捲睡著了 💤',
-          4
-        );
+        setSpeech(mousse.sleepStyle === 1
+          ? '呼嚕嚕…暮斯像奶油一樣融化在木地板上睡著了 💤'
+          : '呼嚕嚕…暮斯捲成一顆蓬鬆肉桂捲睡著了 💤', 4);
       }
       refreshHudUI();
     }
 
-    function toggleKaraoke() {
-      if (karaoke.active) stopKaraoke();
-      else startKaraoke();
-    }
+    function toggleKaraoke() { if (karaoke.active) stopKaraoke(); else startKaraoke(); }
 
     function startKaraoke() {
-      if (mousse.mode === 'walking_out' || mousse.mode === 'away') {
-        setSpeech('暮斯正在外面散步，等他回來再開演唱會！', 2.5);
-        return;
-      }
+      if (isBusyOutside()) { setSpeech('暮斯正在外面散步，等他回來再開演唱會！', 2.5); return; }
       initAudio();
       ball.active = false;
       mousse.carryingBall = false;
@@ -859,17 +784,12 @@
       mousse.targetX = stageW * 0.5;
       mousse.targetY = getFloorLineY() + 44;
       mousse.facing = 1;
-
-      karaoke.active = true;
-      karaoke.lineIdx = 0;
-      karaoke.noteIdx = 0;
-      karaoke.noteTimer = 0;
-      karaoke.lineTimer = 0;
-
+      Object.assign(karaoke, { active: true, lineIdx: 0, noteIdx: 0, noteTimer: 0, lineTimer: 0 });
+      rec.songs++;
       document.getElementById('karaoke-card').classList.remove('hidden');
       updateKaraokeCard();
       refreshHudUI();
-      setSpeech('🎤 暮斯的點陣日K包廂開唱啦！喵～♪', 2.8);
+      setSpeech('🎤 暮斯的日K包廂開唱啦！喵～♪', 2.8);
     }
 
     function stopKaraoke() {
@@ -880,19 +800,15 @@
     }
 
     function selectSong(idx) {
-      karaoke.songIdx = idx;
-      karaoke.lineIdx = 0;
-      karaoke.noteIdx = 0;
-      karaoke.lineTimer = 0;
+      Object.assign(karaoke, { songIdx: idx, lineIdx: 0, noteIdx: 0, lineTimer: 0 });
       updateKaraokeCard();
     }
 
     function updateKaraokeCard() {
       for (let i = 0; i < 3; i++) {
         const btn = document.getElementById('song-btn-' + i);
-        btn.className = i === karaoke.songIdx
-          ? 'text-[11px] font-bold px-2 py-0.5 rounded-lg bg-[#ec4899] text-white'
-          : 'text-[11px] font-bold px-2 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 text-pink-100';
+        btn.style.background = i === karaoke.songIdx ? '#f472b6' : 'rgba(255,255,255,0.15)';
+        btn.style.color = i === karaoke.songIdx ? '#fff' : '#fce7f3';
       }
       const song = KARAOKE_SONGS[karaoke.songIdx];
       const line = song.lines[karaoke.lineIdx % song.lines.length];
@@ -908,36 +824,26 @@
     }
 
     function throwBallTo(tx, ty) {
-      if (mousse.mode === 'walking_out' || mousse.mode === 'away') {
-        setSpeech('暮斯正在外面散步，回來再陪你玩球球！', 2.5);
-        return;
-      }
+      if (isBusyOutside()) { setSpeech('暮斯正在外面散步，回來再陪你玩球球！', 2.5); return; }
       if (karaoke.active) stopKaraoke();
       initAudio();
-
-      const minY = getFloorLineY() + 26;
-      const maxY = stageH - 36;
-      const clampedY = Math.min(maxY, Math.max(minY, ty));
-      const clampedX = Math.min(stageW - 44, Math.max(44, tx));
-
-      ball.active = true;
-      ball.x = stageW * 0.5;
-      ball.y = stageH - 25;
-      ball.z = 36;
-      ball.vx = (clampedX - ball.x) * 1.65;
-      ball.vy = (clampedY - ball.y) * 1.65;
-      ball.vz = 260;
-      ball.spin = 0;
-
+      const minY = getFloorLineY() + 26, maxY = stageH - 36;
+      const cy = Math.min(maxY, Math.max(minY, ty));
+      const cx = Math.min(stageW - 44, Math.max(44, tx));
+      Object.assign(ball, { active: true, x: stageW * 0.5, y: stageH - 25, z: 36, spin: 0, vz: 260 });
+      ball.vx = (cx - ball.x) * 1.65;
+      ball.vy = (cy - ball.y) * 1.65;
       mousse.carryingBall = false;
       mousse.mode = 'chasing';
-      mousse.happyEyes = 0;
       refreshHudUI();
       setSpeech('毛線球飛出來啦！看暮斯甩著蓬鬆尾巴衝去撿！🧶', 2.5);
     }
 
+    /* ==========================================================================
+     * F. WALK & GIFTS (ask first, then reveal)
+     * ========================================================================== */
     function startWalk() {
-      if (mousse.mode === 'walking_out' || mousse.mode === 'away') return;
+      if (isBusyOutside()) return;
       if (karaoke.active) stopKaraoke();
       initAudio();
       ball.active = false;
@@ -945,6 +851,7 @@
       mousse.mode = 'walking_out';
       mousse.targetX = stageW + 90;
       mousse.targetY = getFloorLineY() + 44;
+      rec.walks++;
       refreshHudUI();
       setSpeech('戴上小牽繩出門散步去！幫你帶紀念品回來喵 🐾', 3);
       playMeow(560, 0.25, 0.12);
@@ -960,74 +867,373 @@
       document.getElementById('walk-banner').classList.add('hidden');
       const unowned = SOUVENIR_CATALOG.filter(g => !state.unlockedGifts.includes(g.id));
       const pool = unowned.length > 0 ? unowned : SOUVENIR_CATALOG;
-      const picked = pool[Math.floor(Math.random() * pool.length)];
-
-      if (!state.unlockedGifts.includes(picked.id)) state.unlockedGifts.push(picked.id);
-      state.hasNewGift = true;
-      state.mood = Math.min(100, state.mood + 12);
+      mousse.carryingGift = pool[Math.floor(Math.random() * pool.length)];
       state.energy = Math.max(15, state.energy - 10);
-      saveData();
-
       mousse.x = stageW + 70;
       mousse.y = getFloorLineY() + 46;
       mousse.targetX = stageW * 0.5;
       mousse.targetY = getFloorLineY() + 46;
-      mousse.carryingGift = picked;
       mousse.mode = 'returning_gift';
+      saveData();
       refreshHudUI();
     }
+
+    function askGift() {
+      pendingGift = mousse.carryingGift;
+      mousse.mode = 'offering';
+      playMeow(620, 0.3, 0.12);
+      setSpeech('我回來了！這個…送給你的喵 🎁', 6);
+      document.getElementById('modal-gift-ask').classList.remove('hidden');
+    }
+
+    function answerGift(accept) {
+      document.getElementById('modal-gift-ask').classList.add('hidden');
+      const gift = pendingGift;
+      pendingGift = null;
+      mousse.carryingGift = null;
+      if (!gift) { mousse.mode = 'idle'; return; }
+
+      if (accept) {
+        const isNew = !state.unlockedGifts.includes(gift.id);
+        if (isNew) state.unlockedGifts.push(gift.id);
+        state.hasNewGift = true;
+        state.mood = Math.min(100, state.mood + 12);
+        rec.giftsAccepted++;
+        mousse.mode = 'cheer';
+        mousse.timer = 2.8;
+        playChime();
+        spawnFloatingEmoji('❤️', mousse.x - 16, mousse.y - 140);
+        spawnFloatingEmoji('❤️', mousse.x + 16, mousse.y - 150);
+        setSpeech(`你收下了！暮斯好開心～`, 3.5);
+
+        document.getElementById('reveal-icon').textContent = gift.icon;
+        document.getElementById('reveal-name').textContent = gift.name;
+        document.getElementById('reveal-desc').textContent = gift.desc;
+        const tag = document.getElementById('reveal-tag');
+        tag.textContent = isNew ? '✨ 新收藏！' : '這個已經收藏過囉，再多一個也開心！';
+        const iconEl = document.getElementById('reveal-icon');
+        iconEl.classList.remove('reveal'); void iconEl.offsetWidth; iconEl.classList.add('reveal');
+        document.getElementById('modal-gift-reveal').classList.remove('hidden');
+      } else {
+        state.mood = Math.max(20, state.mood - 5);
+        rec.giftsDeclined++;
+        mousse.mode = 'idle';
+        playMeow(380, 0.45, 0.1);
+        setSpeech('嗚…好吧，那暮斯自己收著喵 😿', 3.5);
+      }
+      saveData();
+      refreshHudUI();
+    }
+
+    function closeGiftReveal() { document.getElementById('modal-gift-reveal').classList.add('hidden'); }
 
     function openGiftModal() {
       state.hasNewGift = false;
       refreshHudUI();
       const grid = document.getElementById('gift-grid');
-      while (grid.firstChild) grid.removeChild(grid.firstChild);
-
+      grid.replaceChildren();
       SOUVENIR_CATALOG.forEach(item => {
         const owned = state.unlockedGifts.includes(item.id);
         const card = document.createElement('div');
         card.className = owned
-          ? 'p-2 rounded-xl bg-white border-2 border-[#4a2c18] flex flex-col items-center text-center'
-          : 'p-2 rounded-xl bg-[#f3e3ca] border-2 border-[#a87c51] flex flex-col items-center text-center opacity-55';
-
+          ? 'p-2 rounded-2xl bg-white border-2 border-[#f6dcc3] flex flex-col items-center text-center'
+          : 'p-2 rounded-2xl bg-[#f8efe5] border-2 border-dashed border-[#e8cdb1] flex flex-col items-center text-center opacity-60';
         const iconEl = document.createElement('div');
         iconEl.className = 'text-2xl sm:text-3xl mb-1';
         iconEl.textContent = owned ? item.icon : '❓';
-
         const nameEl = document.createElement('div');
         nameEl.className = 'text-xs font-bold';
         nameEl.textContent = owned ? item.name : '未解鎖禮物';
-
         const descEl = document.createElement('div');
-        descEl.className = 'text-[10px] text-[#78350f] mt-0.5 leading-tight';
+        descEl.className = 'text-[10px] text-[#a0663a] mt-0.5 leading-tight';
         descEl.textContent = owned ? item.desc : '帶暮斯出門散步有機會帶回來喔！';
-
-        card.appendChild(iconEl);
-        card.appendChild(nameEl);
-        card.appendChild(descEl);
+        card.append(iconEl, nameEl, descEl);
         grid.appendChild(card);
       });
-
       document.getElementById('modal-gifts').classList.remove('hidden');
     }
     function closeGiftModal() { document.getElementById('modal-gifts').classList.add('hidden'); }
 
-    /**
-     * ============================================================================
-     * F. POINTER INTERACTIONS
-     * ============================================================================
-     */
+    /* ==========================================================================
+     * G. PHOTOS ON THE WALL
+     * ========================================================================== */
+    let photoOrder = [];
+    let photoViewIdx = 0;
+
+    function loadPhotos() {
+      PHOTOS.forEach(p => {
+        const img = new Image();
+        img.onload = () => { p.ready = true; };
+        img.src = p.file;
+        p.img = img;
+      });
+      const wall = PHOTOS.map((p, i) => i).filter(i => !PHOTOS[i].noWall);
+      for (let i = wall.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [wall[i], wall[j]] = [wall[j], wall[i]];
+      }
+      photoOrder = wall;
+    }
+    loadPhotos();
+
+    const FRAME_BG = ['#ffe4ec', '#e3f4ff', '#fff3c4', '#e6f8ea'];
+    const FRAME_TILT = [-0.06, 0.05, -0.035, 0.07];
+
+    function getFrameLayout() {
+      const fy = getFloorLineY();
+      const win = getWindowRect();
+      const n = stageW < 520 ? 2 : stageW < 860 ? 3 : 4;
+      const left = win.x + win.w + 34;
+      const right = stageW - 18;
+      const region = right - left;
+      const fh = Math.min(112, fy * 0.4);
+      const items = [];
+      let total = 0;
+      for (let i = 0; i < n; i++) {
+        const p = PHOTOS[photoOrder[i % photoOrder.length]];
+        const aspect = Math.max(0.75, Math.min(1.35, p.crop[2] / p.crop[3]));
+        items.push({ p, idx: photoOrder[i % photoOrder.length], w: fh * aspect, h: fh });
+        total += fh * aspect;
+      }
+      const gap = 22;
+      const scale = Math.min(1, (region - gap * (n - 1)) / total);
+      let x = left + Math.max(0, (region - (total * scale + gap * (n - 1))) / 2);
+      return items.map((it, i) => {
+        const w = it.w * scale, h = it.h * scale;
+        const y = fy * 0.16 + (i % 2) * Math.min(26, fy * 0.08);
+        const r = { ...it, x, y, w, h, tilt: FRAME_TILT[i % 4], bg: FRAME_BG[i % 4] };
+        x += w + gap;
+        return r;
+      }).filter(r => r.w > 40);
+    }
+
+    function openPhotoViewer(idx) {
+      photoViewIdx = idx;
+      showPhoto();
+      document.getElementById('modal-photo').classList.remove('hidden');
+    }
+    function closePhotoViewer() { document.getElementById('modal-photo').classList.add('hidden'); }
+    function stepPhoto(d) { photoViewIdx = (photoViewIdx + d + PHOTOS.length) % PHOTOS.length; showPhoto(); }
+    function showPhoto() {
+      const p = PHOTOS[photoViewIdx];
+      document.getElementById('photo-img').src = p.file;
+      document.getElementById('photo-cap').textContent = p.cap;
+      document.getElementById('photo-idx').textContent = `${photoViewIdx + 1} / ${PHOTOS.length}`;
+    }
+
+    /* ==========================================================================
+     * H. RECORD & BACKUP
+     * ========================================================================== */
+    function openRecordModal() {
+      const days = Math.floor((Date.now() - rec.since) / 86400000) + 1;
+      const d = new Date(rec.since);
+      document.getElementById('record-days').textContent =
+        `🐾 和暮斯一起生活第 ${days} 天（${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} 開始）`;
+
+      const items = [
+        ['🍖', '餵飯', rec.feeds], ['💧', '加水', rec.waters], ['❤️', '摸摸', rec.pets],
+        ['🧶', '撿回毛線球', rec.balls], ['🐾', '散步', rec.walks], ['🧹', '鏟屎', rec.scoops],
+        ['🎤', '唱日K', rec.songs], ['🎁', '收下禮物', rec.giftsAccepted],
+        ['📚', '禮物收藏', `${state.unlockedGifts.length}/${SOUVENIR_CATALOG.length}`]
+      ];
+      const grid = document.getElementById('record-grid');
+      grid.replaceChildren();
+      items.forEach(([icon, label, val]) => grid.appendChild(statCard(icon, label, val)));
+
+      const bugs = document.getElementById('record-bugs');
+      bugs.replaceChildren();
+      BUG_TYPES.forEach(t => bugs.appendChild(statCard(t.id === 'dragonfly' ? '🪽' : t.emoji, t.name, rec.bugs[t.id] + ' 隻')));
+      document.getElementById('backup-msg').textContent = '';
+      document.getElementById('modal-record').classList.remove('hidden');
+    }
+    function closeRecordModal() { document.getElementById('modal-record').classList.add('hidden'); }
+
+    function statCard(icon, label, val) {
+      const c = document.createElement('div');
+      c.className = 'rounded-2xl bg-white border-2 border-[#f6dcc3] p-2 text-center';
+      const a = document.createElement('div'); a.className = 'text-xl'; a.textContent = icon;
+      const b = document.createElement('div'); b.className = 'text-base font-bold'; b.textContent = val;
+      const l = document.createElement('div'); l.className = 'text-[10px] text-[#a0663a]'; l.textContent = label;
+      c.append(a, b, l);
+      return c;
+    }
+
+    function exportProgress() {
+      saveData();
+      const code = 'MOUSSE4:' + btoa(unescape(encodeURIComponent(JSON.stringify(buildSavePayload()))));
+      const ta = document.getElementById('backup-text');
+      ta.value = code;
+      const msg = document.getElementById('backup-msg');
+      const done = () => { msg.textContent = '✅ 已複製進度碼，貼到記事本或傳給自己保存吧！'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done).catch(() => { ta.select(); msg.textContent = '已產生進度碼，請手動全選複製'; });
+      } else { ta.select(); msg.textContent = '已產生進度碼，請手動全選複製'; }
+    }
+
+    function importProgress() {
+      const msg = document.getElementById('backup-msg');
+      let raw = document.getElementById('backup-text').value.trim();
+      if (!raw) { msg.textContent = '請先貼上進度碼'; return; }
+      try {
+        raw = raw.replace(/^MOUSSE\d*:/, '');
+        const d = JSON.parse(decodeURIComponent(escape(atob(raw))));
+        applySave(d);
+        saveData();
+        lastHudKey = '';
+        refreshHudUI();
+        openRecordModal();
+        document.getElementById('backup-msg').textContent = '✅ 匯入成功！暮斯的進度回來了';
+        setSpeech('喵！我記得你～進度都回來了 💕', 3);
+      } catch (e) {
+        msg.textContent = '❌ 進度碼格式不對，請確認有完整複製';
+      }
+    }
+
+    /* ==========================================================================
+     * I. BUGS (butterflies etc.) & HUNTING
+     * ========================================================================== */
+    function spawnBug(typeId) {
+      let t;
+      if (typeId) t = BUG_TYPES.find(b => b.id === typeId);
+      else {
+        const total = BUG_TYPES.reduce((a, b) => a + b.weight, 0);
+        let r = Math.random() * total;
+        t = BUG_TYPES.find(b => (r -= b.weight) < 0) || BUG_TYPES[0];
+      }
+      const win = getWindowRect();
+      const fromWindow = Math.random() < 0.5;
+      const fromLeft = Math.random() < 0.5;
+      bug = {
+        type: t,
+        x: fromWindow ? win.x + win.w / 2 : (fromLeft ? -30 : stageW + 30),
+        y: fromWindow ? win.y + win.h / 2 : getFloorLineY() * (0.3 + Math.random() * 0.4),
+        tx: 0, ty: 0, t: Math.random() * 10, life: 24 + Math.random() * 12,
+        state: 'flying', speedMul: 1, attempts: 0, hold: 0, face: 1, hunted: false,
+        colors: BUTTERFLY_COLORS[Math.floor(Math.random() * BUTTERFLY_COLORS.length)]
+      };
+      pickBugWaypoint();
+    }
+
+    function pickBugWaypoint(high = false) {
+      const fy = getFloorLineY();
+      const h = catBaseH();
+      bug.tx = 40 + Math.random() * (stageW - 80);
+      if (high) bug.ty = fy * (0.15 + Math.random() * 0.3);
+      else if (bug.hunted) bug.ty = fy - h * 0.9 + Math.random() * h * 0.9;
+      else bug.ty = fy * (0.25 + Math.random() * 0.6);
+    }
+
+    function bugLeave() {
+      if (!bug) return;
+      bug.state = 'leaving';
+      bug.speedMul = 1.8;
+      const win = getWindowRect();
+      if (Math.random() < 0.5) { bug.tx = win.x + win.w / 2; bug.ty = win.y + win.h / 2; bug.exitWindow = true; }
+      else { bug.tx = Math.random() < 0.5 ? -60 : stageW + 60; bug.ty = getFloorLineY() * 0.3; }
+    }
+
+    function updateBug(dt) {
+      if (!bug) {
+        if (mousse.mode !== 'away' && !document.hidden) {
+          nextBugIn -= dt;
+          if (nextBugIn <= 0) { spawnBug(); nextBugIn = 25 + Math.random() * 35; }
+        }
+        return;
+      }
+      bug.t += dt;
+      if (bug.state === 'caught') {
+        const { h } = currentSpriteInfo();
+        bug.x = mousse.x;
+        const lift = mousse.mode === 'pounce' ? Math.sin((1 - Math.max(0, mousse.timer) / 0.75) * Math.PI) * h * 0.38 : 0;
+        bug.y = mousse.y + 12 - lift - h * 0.9;
+        bug.hold -= dt;
+        if (bug.hold <= 0) {
+          bug.state = 'leaving';
+          bug.speedMul = 1.4;
+          bug.tx = bug.x + (Math.random() - 0.5) * 200;
+          bug.ty = -80;
+        }
+        return;
+      }
+      const dx = bug.tx - bug.x, dy = bug.ty - bug.y;
+      const dist = Math.hypot(dx, dy);
+      const sp = bug.type.speed * bug.speedMul;
+      if (Math.abs(dx) > 2) bug.face = dx > 0 ? 1 : -1;
+      if (dist < 8) {
+        if (bug.state === 'leaving') { bug = null; return; }
+        if (bug.state === 'escaping') { bug.state = 'flying'; bug.speedMul = 1; }
+        pickBugWaypoint();
+      } else {
+        bug.x += (dx / dist) * sp * dt;
+        bug.y += (dy / dist) * sp * dt;
+      }
+      if (bug.state === 'leaving' && (bug.x < -50 || bug.x > stageW + 50 || bug.y < -60)) { bug = null; return; }
+      bug.life -= dt;
+      if (bug.life <= 0 && (bug.state === 'flying')) {
+        bugLeave();
+        if (mousse.mode === 'hunting' || mousse.mode === 'noticing') {
+          mousse.mode = 'idle';
+          setSpeech(`${bug.type.name}飛走了…下次再陪我玩喵～`, 3);
+        }
+      }
+    }
+
+    function startNotice() {
+      if (!bug) return;
+      karaoke.active && stopKaraoke();
+      mousse.mode = 'noticing';
+      mousse.timer = 0.9;
+      mousse.facing = bug.x > mousse.x ? 1 : -1;
+      bug.hunted = true;
+      playMeow(720, 0.18, 0.1);
+      setSpeech(`咦？！有${bug.type.name}飛進來了！`, 2.4);
+    }
+
+    function huntTarget() {
+      const h = catBaseH();
+      const minY = getFloorLineY() + 26, maxY = stageH - 36;
+      return {
+        x: Math.min(stageW - 50, Math.max(50, bug.x)),
+        y: Math.min(maxY, Math.max(minY, bug.y + h * 1.05))
+      };
+    }
+
+    function resolvePounce() {
+      if (!bug) return;
+      const h = catBaseH();
+      const reachY = mousse.y - h * 1.35;
+      const near = Math.abs(bug.x - mousse.x) < h * 0.7 && Math.abs(bug.y - reachY) < h * 0.75;
+      const chance = 0.4 + bug.attempts * 0.2;
+      if (near && Math.random() < chance) {
+        bug.state = 'caught';
+        bug.hold = 1.8;
+        rec.bugs[bug.type.id] = (rec.bugs[bug.type.id] || 0) + 1;
+        state.mood = Math.min(100, state.mood + 10);
+        playChime();
+        spawnFloatingEmoji('✨', mousse.x - 20, mousse.y - h - 20);
+        spawnFloatingEmoji('❤️', mousse.x + 20, mousse.y - h - 30);
+        setSpeech(`抓到${bug.type.name}了！聞一聞…再輕輕放牠走～`, 3.5);
+        saveData();
+      } else {
+        bug.attempts++;
+        bug.state = 'escaping';
+        bug.speedMul = 2.4;
+        pickBugWaypoint(true);
+        const lines = ['差一點點！喵嗚～', '撲空了…再來一次！', '可惡，牠飛好高！'];
+        setSpeech(lines[Math.floor(Math.random() * lines.length)], 2);
+      }
+    }
+
+    /* ==========================================================================
+     * J. POINTER
+     * ========================================================================== */
     let isDraggingPet = false;
     let lastPetSoundTime = 0;
 
     function isHitMousse(px, py) {
       if (mousse.mode === 'away') return false;
-      if (spritesReady) {
-        const { w, h } = currentSpriteInfo();
-        return Math.abs(px - mousse.x) < w * 0.5 + 10 && py < mousse.y + 22 && py > mousse.y + 12 - h - 10;
-      }
-      const centerY = mousse.mode === 'sleeping' ? mousse.y - 24 : mousse.y - 64;
-      return Math.hypot(px - mousse.x, py - centerY) < 88;
+      const { w, h } = currentSpriteInfo();
+      return Math.abs(px - mousse.x) < w * 0.5 + 10 && py < mousse.y + 22 && py > mousse.y + 2 - h;
     }
 
     function petMousseAt(px, py) {
@@ -1037,9 +1243,9 @@
         playPurr(0.75);
         spawnFloatingEmoji('❤️', px - 10, py - 24);
         state.mood = Math.min(100, state.mood + 2);
+        rec.pets++;
         refreshHudUI();
       }
-      mousse.happyEyes = 1;
       if (mousse.mode === 'idle') {
         mousse.mode = 'cheer';
         mousse.timer = 1.6;
@@ -1051,62 +1257,62 @@
       }
     }
 
+    function pointInFrame(px, py, f) {
+      const cx = f.x + f.w / 2, cy = f.y + f.h / 2;
+      return Math.abs(px - cx) < f.w / 2 + 6 && Math.abs(py - cy) < f.h / 2 + 6;
+    }
+
     canvas.addEventListener('pointerdown', (e) => {
       const rect = canvas.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
+      const px = e.clientX - rect.left, py = e.clientY - rect.top;
       isDraggingPet = true;
+      initAudio();
+
+      // Bug tap: point it out to Mousse
+      if (bug && (bug.state === 'flying' || bug.state === 'escaping') && Math.hypot(px - bug.x, py - bug.y) < 34) {
+        if (mousse.mode === 'sleeping') setSpeech('暮斯睡得好熟，沒看到蟲蟲… 💤', 2.4);
+        else if (['idle', 'cheer'].includes(mousse.mode)) startNotice();
+        else if (mousse.mode !== 'hunting' && mousse.mode !== 'pounce' && mousse.mode !== 'noticing') setSpeech('暮斯現在在忙，等等再抓蟲蟲！', 2.2);
+        return;
+      }
+
+      for (const f of getFrameLayout()) {
+        if (pointInFrame(px, py, f)) { openPhotoViewer(f.idx); return; }
+      }
 
       const props = getPropsCoords();
       if (Math.hypot(px - props.food.x, py - props.food.y) < 42) { openFeedModal(); return; }
       if (Math.hypot(px - props.water.x, py - (props.water.y - 16)) < 42) { refillWater(); return; }
       if (Math.hypot(px - props.litter.x, py - (props.litter.y - 14)) < 64) { scoopLitterBox(); return; }
 
-      if (isHitMousse(px, py)) {
-        petMousseAt(px, py);
-      } else if (py > getFloorLineY() + 10) {
-        throwBallTo(px, py);
-      }
+      if (isHitMousse(px, py)) petMousseAt(px, py);
+      else if (py > getFloorLineY() + 10) throwBallTo(px, py);
     });
 
     canvas.addEventListener('pointermove', (e) => {
       if (!isDraggingPet) return;
       const rect = canvas.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
+      const px = e.clientX - rect.left, py = e.clientY - rect.top;
       if (isHitMousse(px, py)) petMousseAt(px, py);
     });
-
     window.addEventListener('pointerup', () => { isDraggingPet = false; });
 
-    /**
-     * ============================================================================
-     * G. SIMULATION LOOP
-     * ============================================================================
-     */
+    /* ==========================================================================
+     * K. SIMULATION
+     * ========================================================================== */
     function updateSimulation(dt) {
       mousse.time += dt;
-      mousse.tailPhase += dt * (mousse.mode === 'karaoke' ? 5.2 : 2.6);
-
-      mousse.blinkTimer -= dt;
-      if (mousse.blinkTimer <= 0) {
-        if (!mousse.isBlinking) {
-          mousse.isBlinking = true;
-          mousse.blinkTimer = 0.15;
-        } else {
-          mousse.isBlinking = false;
-          mousse.blinkTimer = 2.4 + Math.random() * 2.5;
-        }
-      }
+      huntCooldown = Math.max(0, huntCooldown - dt);
 
       if (mousse.bubbleTime > 0) {
         mousse.bubbleTime -= dt;
         if (mousse.bubbleTime <= 0 && mousse.mode === 'idle') {
           const idlePhrases = [
-            '呼嚕嚕～滑過暮斯可以摸摸頭、看我舉肉球喔 ❤️',
-            '點擊木地板任何地方就能丟毛線球 🧶',
-            '想聽暮斯唱日文歌嗎？按下面唱日K 🎤',
-            '吃飽喝足便意滿了，暮斯會自己去貓砂盆喔 💩'
+            '摸摸暮斯的頭，看我舉肉球喔 ❤️',
+            '點木地板任何地方就能丟毛線球 🧶',
+            '點牆上的照片可以看暮斯本人 📷',
+            '有蟲蟲飛進來的話，點牠一下我就會去抓！🦋',
+            '想聽暮斯唱日文歌嗎？按下面唱日K 🎤'
           ];
           setSpeech(idlePhrases[Math.floor(Math.random() * idlePhrases.length)], 5);
         }
@@ -1115,604 +1321,616 @@
       if (mousse.mode === 'sleeping') {
         state.energy = Math.min(100, state.energy + dt * 4.2);
         state.hunger = Math.max(0, state.hunger - dt * 0.2);
-        if (Math.random() < dt * 0.9) {
-          spawnFloatingEmoji('💤', mousse.x + 28, mousse.y - 42);
-        }
+        if (Math.random() < dt * 0.9) spawnFloatingEmoji('💤', mousse.x + 28, mousse.y - 50);
         if (state.energy >= 100) {
           mousse.mode = 'idle';
-          mousse.happyEyes = 0;
           setSpeech('充飽電啦！暮斯精神百倍醒來了！⚡', 3);
         }
       } else if (mousse.mode !== 'away') {
         state.hunger = Math.max(0, state.hunger - dt * 0.42);
         state.hydration = Math.max(0, state.hydration - dt * 0.35);
         state.energy = Math.max(10, state.energy - dt * 0.32);
-        if (state.poopCount > 0) {
-          state.mood = Math.max(25, state.mood - dt * 0.3 * state.poopCount);
-        }
+        if (state.poopCount > 0) state.mood = Math.max(25, state.mood - dt * 0.3 * state.poopCount);
       }
 
-      if ((mousse.mode === 'idle' || mousse.mode === 'cheer') && state.bladder >= 75) {
-        triggerLitterVisit();
+      if ((mousse.mode === 'idle' || mousse.mode === 'cheer') && state.bladder >= 75) triggerLitterVisit();
+
+      // Notice bugs when free
+      if (bug && bug.state === 'flying' && mousse.mode === 'idle' && !karaoke.active && huntCooldown <= 0 && state.energy > 15) {
+        startNotice();
       }
 
-      if (mousse.mode === 'cheer') {
-        mousse.timer -= dt;
-        if (mousse.timer <= 0) {
-          mousse.mode = 'idle';
-          mousse.happyEyes = 0;
-        }
-      }
+      switch (mousse.mode) {
+        case 'cheer':
+          mousse.timer -= dt;
+          if (mousse.timer <= 0) mousse.mode = 'idle';
+          break;
 
-      if (mousse.mode === 'going_eat') {
-        if (moveMousseTowards(mousse.targetX, mousse.targetY, 250, dt)) {
-          mousse.facing = -1;
-          mousse.mode = 'eating';
-          mousse.timer = 3.2;
-          mousse.tick = 0;
-        }
-      }
-
-      if (mousse.mode === 'eating') {
-        mousse.timer -= dt;
-        mousse.tick += dt;
-        state.bowlFood = Math.max(0, mousse.timer / 3.2);
-        if (mousse.tick >= 0.46) {
-          mousse.tick = 0;
-          playCrunch(false);
-        }
-        if (mousse.timer <= 0) {
-          const t = state.bowlType;
-          state.bowlType = null;
-          state.bowlFood = 0;
-          if (t === 'wet') {
-            state.hunger = Math.min(100, state.hunger + 40);
-            state.hydration = Math.min(100, state.hydration + 24);
-            state.bladder = Math.min(100, state.bladder + 40);
-            state.mood = Math.min(100, state.mood + 12);
-            setSpeech('假日主食餐包太好吃啦喵～幸福舉肉球！❤️', 3.2);
-          } else if (t === 'kibble20') {
-            state.hunger = Math.min(100, state.hunger + 32);
-            state.bladder = Math.min(100, state.bladder + 35);
-            state.mood = Math.min(100, state.mood + 7);
-            setSpeech('20g 乾飼料全部吃光光！', 3);
-          } else {
-            state.hunger = Math.min(100, state.hunger + 18);
-            state.bladder = Math.min(100, state.bladder + 22);
-            state.mood = Math.min(100, state.mood + 5);
-            setSpeech('香脆乾乾真美味～喵！', 3);
+        case 'going_eat':
+          if (moveMousseTowards(mousse.targetX, mousse.targetY, 250, dt)) {
+            mousse.facing = -1; mousse.mode = 'eating'; mousse.timer = 3.2; mousse.tick = 0;
           }
-          saveData();
+          break;
 
-          if (state.fountainWater > 0.15 && (state.hydration < 85 || t !== 'wet') && state.bladder < 75) {
-            const props = getPropsCoords();
-            mousse.mode = 'going_drink';
-            mousse.targetX = props.water.x + 52;
-            mousse.targetY = props.water.y + 4;
-          } else {
-            mousse.mode = 'cheer';
-            mousse.timer = 1.8;
+        case 'eating': {
+          mousse.timer -= dt; mousse.tick += dt;
+          state.bowlFood = Math.max(0, mousse.timer / 3.2);
+          if (mousse.tick >= 0.46) { mousse.tick = 0; playCrunch(false); }
+          if (mousse.timer <= 0) {
+            const t = state.bowlType;
+            state.bowlType = null; state.bowlFood = 0;
+            if (t === 'wet') {
+              state.hunger = Math.min(100, state.hunger + 40);
+              state.hydration = Math.min(100, state.hydration + 24);
+              state.bladder = Math.min(100, state.bladder + 40);
+              state.mood = Math.min(100, state.mood + 12);
+              setSpeech('假日主食餐包太好吃啦喵～幸福舉肉球！❤️', 3.2);
+            } else if (t === 'kibble20') {
+              state.hunger = Math.min(100, state.hunger + 32);
+              state.bladder = Math.min(100, state.bladder + 35);
+              state.mood = Math.min(100, state.mood + 7);
+              setSpeech('20g 乾飼料全部吃光光！', 3);
+            } else {
+              state.hunger = Math.min(100, state.hunger + 18);
+              state.bladder = Math.min(100, state.bladder + 22);
+              state.mood = Math.min(100, state.mood + 5);
+              setSpeech('香脆乾乾真美味～喵！', 3);
+            }
+            saveData();
+            if (state.fountainWater > 0.15 && (state.hydration < 85 || t !== 'wet') && state.bladder < 75) {
+              const props = getPropsCoords();
+              mousse.mode = 'going_drink';
+              mousse.targetX = props.water.x + 52;
+              mousse.targetY = props.water.y + 4;
+            } else {
+              mousse.mode = 'cheer'; mousse.timer = 1.8;
+            }
           }
+          break;
         }
-      }
 
-      if (mousse.mode === 'going_drink') {
-        if (moveMousseTowards(mousse.targetX, mousse.targetY, 225, dt)) {
-          mousse.facing = -1;
-          mousse.mode = 'drinking';
-          mousse.timer = 2.4;
-          mousse.tick = 0;
-        }
-      }
+        case 'going_drink':
+          if (moveMousseTowards(mousse.targetX, mousse.targetY, 225, dt)) {
+            mousse.facing = -1; mousse.mode = 'drinking'; mousse.timer = 2.4; mousse.tick = 0;
+          }
+          break;
 
-      if (mousse.mode === 'drinking') {
-        mousse.timer -= dt;
-        mousse.tick += dt;
-        state.fountainWater = Math.max(0.1, state.fountainWater - dt * 0.06);
-        if (mousse.tick >= 0.4) {
-          mousse.tick = 0;
-          playCrunch(true);
-        }
-        if (mousse.timer <= 0) {
-          state.hydration = Math.min(100, state.hydration + 25);
-          state.bladder = Math.min(100, state.bladder + 25);
-          saveData();
-          if (state.bladder >= 75) {
-            triggerLitterVisit();
-          } else {
+        case 'drinking':
+          mousse.timer -= dt; mousse.tick += dt;
+          state.fountainWater = Math.max(0.1, state.fountainWater - dt * 0.06);
+          if (mousse.tick >= 0.4) { mousse.tick = 0; playCrunch(true); }
+          if (mousse.timer <= 0) {
+            state.hydration = Math.min(100, state.hydration + 25);
+            state.bladder = Math.min(100, state.bladder + 25);
+            saveData();
+            if (state.bladder >= 75) triggerLitterVisit();
+            else { mousse.mode = 'idle'; setSpeech('喝完水嘴角濕濕的～舔舔嘴巴喵 💧', 3); }
+          }
+          break;
+
+        case 'going_litter':
+          if (moveMousseTowards(mousse.targetX, mousse.targetY, 240, dt)) {
+            mousse.y -= 12; mousse.facing = -1; mousse.mode = 'squatting'; mousse.timer = 2.6;
+            setSpeech('暮斯正在貓砂盆裡專心上廁所…（請勿打擾🙈）', 2.6);
+          }
+          break;
+
+        case 'squatting':
+          mousse.timer -= dt;
+          if (mousse.timer <= 0) {
+            mousse.mode = 'digging'; mousse.timer = 1.6; mousse.tick = 0;
+            state.bladder = 0;
+            state.poopCount = Math.min(4, state.poopCount + 1);
+            setSpeech('沙沙沙～乖乖撥豆腐砂把便便蓋起來！', 2);
+          }
+          break;
+
+        case 'digging':
+          mousse.timer -= dt; mousse.tick += dt;
+          if (mousse.tick >= 0.34) { mousse.tick = 0; playDigNoise(); }
+          if (mousse.timer <= 0) {
+            mousse.x = stageW * 0.54;
+            mousse.y = getFloorLineY() + 46;
             mousse.mode = 'idle';
-            setSpeech('喝完水嘴角濕濕的～舔舔嘴巴喵 💧', 3);
+            playMeow(550, 0.25, 0.12);
+            saveData();
+            setSpeech('上完廁所好輕鬆喵！記得點貓砂盆或按鏟屎喔 🧹💩', 4.5);
           }
+          break;
+
+        case 'karaoke':
+          if (!karaoke.active) break;
+          moveMousseTowards(mousse.targetX, mousse.targetY, 200, dt);
+          karaoke.noteTimer += dt;
+          if (karaoke.noteTimer >= 0.52) {
+            karaoke.noteTimer = 0;
+            const song = KARAOKE_SONGS[karaoke.songIdx];
+            playMeow(song.notes[karaoke.noteIdx % song.notes.length], 0.36, 0.1);
+            karaoke.noteIdx++;
+            spawnFloatingEmoji(Math.random() > 0.5 ? '🎵' : '🎶', mousse.x + (Math.random() - 0.5) * 70, mousse.y - catBaseH() * 1.3);
+            state.mood = Math.min(100, state.mood + 0.8);
+          }
+          karaoke.lineTimer += dt;
+          if (karaoke.lineTimer >= 3.4) { karaoke.lineTimer = 0; karaoke.lineIdx++; updateKaraokeCard(); }
+          break;
+
+        case 'returning_ball':
+          if (moveMousseTowards(mousse.targetX, mousse.targetY, 270, dt)) {
+            mousse.carryingBall = false;
+            mousse.mode = 'cheer'; mousse.timer = 2.2;
+            state.mood = Math.min(100, state.mood + 8);
+            state.energy = Math.max(10, state.energy - 5);
+            rec.balls++;
+            playPurr(0.85);
+            spawnFloatingEmoji('❤️', mousse.x - 18, mousse.y - 130);
+            spawnFloatingEmoji('❤️', mousse.x + 18, mousse.y - 140);
+            saveData();
+            setSpeech('呼嚕嚕～球球送回來了，開心舉雙手！❤️', 3.4);
+          }
+          break;
+
+        case 'walking_out':
+          if (moveMousseTowards(mousse.targetX, mousse.targetY, 230, dt)) {
+            mousse.mode = 'away';
+            walkAdventure.remaining = 8;
+            walkAdventure.timerAccum = 0;
+            document.getElementById('walk-countdown').textContent = '8';
+            document.getElementById('walk-banner').classList.remove('hidden');
+            document.getElementById('speech-bubble').style.opacity = '0';
+          }
+          break;
+
+        case 'away':
+          walkAdventure.timerAccum += dt;
+          if (walkAdventure.timerAccum >= 1) {
+            walkAdventure.timerAccum -= 1;
+            walkAdventure.remaining--;
+            document.getElementById('walk-countdown').textContent = String(Math.max(0, walkAdventure.remaining));
+            if (walkAdventure.remaining <= 0) completeWalkReturn();
+          }
+          break;
+
+        case 'returning_gift':
+          if (moveMousseTowards(mousse.targetX, mousse.targetY, 240, dt)) askGift();
+          break;
+
+        case 'noticing':
+          mousse.timer -= dt;
+          if (!bug || bug.state === 'leaving') { mousse.mode = 'idle'; break; }
+          mousse.facing = bug.x > mousse.x ? 1 : -1;
+          if (mousse.timer <= 0) { mousse.mode = 'hunting'; mousse.huntTime = 0; }
+          break;
+
+        case 'hunting': {
+          if (!bug || bug.state === 'leaving' || bug.state === 'caught') { mousse.mode = 'idle'; break; }
+          mousse.huntTime += dt;
+          const tg = huntTarget();
+          moveMousseTowards(tg.x, tg.y, 210, dt);
+          const close = Math.abs(bug.x - mousse.x) < 46 && Math.abs(mousse.y - tg.y) < 18;
+          if (close && bug.state === 'flying') {
+            mousse.mode = 'pounce';
+            mousse.timer = 0.75;
+            mousse.pounceChecked = false;
+            mousse.facing = bug.x >= mousse.x ? 1 : -1;
+            rec.pounces++;
+            state.energy = Math.max(10, state.energy - 2);
+            playMeow(760, 0.16, 0.1);
+          } else if (mousse.huntTime > 9) {
+            bug.attempts++;
+            mousse.huntTime = 0;
+            if (bug.attempts >= 3) giveUpHunt();
+          }
+          break;
         }
+
+        case 'pounce':
+          mousse.timer -= dt;
+          if (!mousse.pounceChecked && mousse.timer <= 0.4) { mousse.pounceChecked = true; resolvePounce(); }
+          if (mousse.timer <= 0) {
+            if (bug && bug.state === 'caught') { mousse.mode = 'cheer'; mousse.timer = 2; }
+            else { mousse.mode = 'landing'; mousse.timer = 0.5; }
+          }
+          break;
+
+        case 'landing':
+          mousse.timer -= dt;
+          if (mousse.timer <= 0) {
+            if (bug && bug.attempts >= 3) giveUpHunt();
+            else if (bug && (bug.state === 'flying' || bug.state === 'escaping')) { mousse.mode = 'hunting'; mousse.huntTime = 0; }
+            else mousse.mode = 'idle';
+          }
+          break;
       }
 
-      if (mousse.mode === 'going_litter') {
-        if (moveMousseTowards(mousse.targetX, mousse.targetY, 240, dt)) {
-          mousse.y -= 12;
-          mousse.facing = -1;
-          mousse.mode = 'squatting';
-          mousse.timer = 2.6;
-          setSpeech('暮斯正在貓砂盆裡專心上廁所…（請勿打擾🙈）', 2.6);
-        }
-      }
-
-      if (mousse.mode === 'squatting') {
-        mousse.timer -= dt;
-        if (mousse.timer <= 0) {
-          mousse.mode = 'digging';
-          mousse.timer = 1.6;
-          mousse.tick = 0;
-          state.bladder = 0;
-          state.poopCount = Math.min(4, state.poopCount + 1);
-          setSpeech('沙沙沙～乖乖撥豆腐砂把便便蓋起來！', 2);
-        }
-      }
-
-      if (mousse.mode === 'digging') {
-        mousse.timer -= dt;
-        mousse.tick += dt;
-        if (mousse.tick >= 0.34) {
-          mousse.tick = 0;
-          playDigNoise();
-        }
-        if (mousse.timer <= 0) {
-          mousse.x = stageW * 0.54;
-          mousse.y = getFloorLineY() + 46;
-          mousse.mode = 'idle';
-          playMeow(550, 0.25, 0.12);
-          saveData();
-          setSpeech('上完廁所好輕鬆喵！記得點貓砂盆或按鏟屎喔 🧹💩', 4.5);
-        }
-      }
-
-      if (karaoke.active && mousse.mode === 'karaoke') {
-        moveMousseTowards(mousse.targetX, mousse.targetY, 200, dt);
-        karaoke.noteTimer += dt;
-        if (karaoke.noteTimer >= 0.52) {
-          karaoke.noteTimer = 0;
-          const song = KARAOKE_SONGS[karaoke.songIdx];
-          const freq = song.notes[karaoke.noteIdx % song.notes.length];
-          karaoke.noteIdx++;
-          playMeow(freq, 0.36, 0.1);
-          spawnFloatingEmoji(Math.random() > 0.5 ? '🎵' : '🎶', mousse.x + (Math.random() - 0.5) * 70, mousse.y - 115);
-          state.mood = Math.min(100, state.mood + 0.8);
-        }
-        karaoke.lineTimer += dt;
-        if (karaoke.lineTimer >= 3.4) {
-          karaoke.lineTimer = 0;
-          karaoke.lineIdx++;
-          updateKaraokeCard();
-        }
-      }
-
+      // Yarn ball physics
       if (ball.active) {
-        ball.x += ball.vx * dt;
-        ball.y += ball.vy * dt;
-        ball.z += ball.vz * dt;
+        ball.x += ball.vx * dt; ball.y += ball.vy * dt; ball.z += ball.vz * dt;
         ball.vz -= 780 * dt;
         ball.spin += (ball.vx * 0.04) * dt;
-
         if (ball.z <= 0) {
           ball.z = 0;
           if (Math.abs(ball.vz) > 45) {
             playBounce(Math.min(1, Math.abs(ball.vz) / 260));
-            ball.vz = -ball.vz * 0.52;
-            ball.vx *= 0.72;
-            ball.vy *= 0.72;
+            ball.vz = -ball.vz * 0.52; ball.vx *= 0.72; ball.vy *= 0.72;
           } else {
             ball.vz = 0;
-            ball.vx *= Math.pow(0.06, dt);
-            ball.vy *= Math.pow(0.06, dt);
+            ball.vx *= Math.pow(0.06, dt); ball.vy *= Math.pow(0.06, dt);
           }
         }
-
-        const minY = getFloorLineY() + 26;
-        const maxY = stageH - 36;
+        const minY = getFloorLineY() + 26, maxY = stageH - 36;
         if (ball.x < 40) { ball.x = 40; ball.vx = Math.abs(ball.vx) * 0.7; }
         if (ball.x > stageW - 40) { ball.x = stageW - 40; ball.vx = -Math.abs(ball.vx) * 0.7; }
         if (ball.y < minY) { ball.y = minY; ball.vy = Math.abs(ball.vy) * 0.7; }
         if (ball.y > maxY) { ball.y = maxY; ball.vy = -Math.abs(ball.vy) * 0.7; }
-
-        if (mousse.mode === 'chasing') {
-          if (moveMousseTowards(ball.x, ball.y, 330, dt)) {
-            ball.active = false;
-            mousse.carryingBall = true;
-            mousse.mode = 'returning_ball';
-            mousse.targetX = stageW * 0.5;
-            mousse.targetY = getFloorLineY() + 56;
-            playMeow(610, 0.22, 0.12);
-            setSpeech('叼到毛線球啦！小跑送回來給你～🧶', 2.5);
-          }
+        if (mousse.mode === 'chasing' && moveMousseTowards(ball.x, ball.y, 330, dt)) {
+          ball.active = false;
+          mousse.carryingBall = true;
+          mousse.mode = 'returning_ball';
+          mousse.targetX = stageW * 0.5;
+          mousse.targetY = getFloorLineY() + 56;
+          playMeow(610, 0.22, 0.12);
+          setSpeech('叼到毛線球啦！小跑送回來給你～🧶', 2.5);
         }
+      } else if (mousse.mode === 'chasing') {
+        mousse.mode = 'idle';
       }
 
-      if (mousse.mode === 'returning_ball') {
-        if (moveMousseTowards(mousse.targetX, mousse.targetY, 270, dt)) {
-          mousse.carryingBall = false;
-          mousse.mode = 'cheer';
-          mousse.timer = 2.2;
-          state.mood = Math.min(100, state.mood + 8);
-          state.energy = Math.max(10, state.energy - 5);
-          playPurr(0.85);
-          spawnFloatingEmoji('❤️', mousse.x - 18, mousse.y - 110);
-          spawnFloatingEmoji('❤️', mousse.x + 18, mousse.y - 120);
-          saveData();
-          setSpeech('呼嚕嚕～球球送回來了，開心舉雙手！❤️', 3.4);
-        }
-      }
+      updateBug(dt);
 
-      if (mousse.mode === 'walking_out') {
-        if (moveMousseTowards(mousse.targetX, mousse.targetY, 230, dt)) {
-          mousse.mode = 'away';
-          walkAdventure.remaining = 8;
-          walkAdventure.timerAccum = 0;
-          document.getElementById('walk-countdown').textContent = '8';
-          document.getElementById('walk-banner').classList.remove('hidden');
-          document.getElementById('speech-bubble').style.opacity = '0';
-        }
-      }
-
-      if (mousse.mode === 'away') {
-        walkAdventure.timerAccum += dt;
-        if (walkAdventure.timerAccum >= 1) {
-          walkAdventure.timerAccum -= 1;
-          walkAdventure.remaining--;
-          document.getElementById('walk-countdown').textContent = String(Math.max(0, walkAdventure.remaining));
-          if (walkAdventure.remaining <= 0) completeWalkReturn();
-        }
-      }
-
-      if (mousse.mode === 'returning_gift') {
-        if (moveMousseTowards(mousse.targetX, mousse.targetY, 240, dt)) {
-          const gift = mousse.carryingGift;
-          mousse.carryingGift = null;
-          mousse.mode = 'cheer';
-          mousse.timer = 2.8;
-          playChime();
-          spawnFloatingEmoji(gift ? gift.icon : '🎁', mousse.x, mousse.y - 120);
-          setSpeech(`散步回來啦！暮斯帶了「${gift ? gift.name : '小禮物'}」送給你！🎁`, 4.5);
-        }
-      }
-
+      // Bubble follows head
       const bubbleEl = document.getElementById('speech-bubble');
-      const headOffset = spritesReady
-        ? currentSpriteInfo().h + 4
-        : (mousse.mode === 'sleeping' ? 68 : 138);
+      const info = currentSpriteInfo();
       const bx = Math.min(stageW - 110, Math.max(110, mousse.x));
-      const by = Math.max(46, mousse.y - headOffset);
+      const by = Math.max(46, mousse.y + 4 - info.h - (mousse.mode === 'pounce' ? info.h * 0.3 : 0));
       bubbleEl.style.left = `${bx}px`;
       bubbleEl.style.top = `${by}px`;
 
       refreshHudUI();
     }
 
+    function giveUpHunt() {
+      bugLeave();
+      mousse.mode = 'idle';
+      huntCooldown = 8;
+      setSpeech('哼！下次一定抓到你喵！😾', 3);
+    }
+
     function moveMousseTowards(tx, ty, speed, dt) {
-      const dx = tx - mousse.x;
-      const dy = ty - mousse.y;
+      const dx = tx - mousse.x, dy = ty - mousse.y;
       const dist = Math.hypot(dx, dy);
       if (Math.abs(dx) > 3) mousse.facing = dx > 0 ? 1 : -1;
-      if (dist <= 8) {
-        mousse.x = tx;
-        mousse.y = ty;
-        return true;
-      }
+      if (dist <= 8) { mousse.x = tx; mousse.y = ty; return true; }
       mousse.x += (dx / dist) * speed * dt;
       mousse.y += (dy / dist) * (speed * 0.65) * dt;
       mousse.walkPhase += dt * 13;
       return false;
     }
 
-    /**
-     * ============================================================================
-     * H. CRISP PIXEL-ART SPRITE RENDERER (MATCHING ALL 6 REFERENCE POSES!)
-     * ============================================================================
-     */
-    const PX = 3.5; // Pixel block size for retro crisp pixel-art look
-
-    // Helper: draw a pixel-aligned rectangle relative to local sprite origin
-    function pxRect(gx, gy, gw, gh, color) {
-      ctx.fillStyle = color;
-      ctx.fillRect(Math.round(gx * PX), Math.round(gy * PX), Math.round(gw * PX), Math.round(gh * PX));
+    /* ==========================================================================
+     * L. SCENE RENDERING (soft 2D)
+     * ========================================================================== */
+    function rr(x, y, w, h, r) {
+      ctx.beginPath();
+      if (ctx.roundRect) { ctx.roundRect(x, y, w, h, r); return; }
+      r = Math.min(r, w / 2, h / 2);
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
     }
-
-    // Helper: draw a fluffy pixel blob with dark pixel outline & golden shading
-    function drawPixelFluff(cx, cy, rx, ry, seed = 0) {
-      const x0 = Math.floor(cx - rx - 1);
-      const x1 = Math.ceil(cx + rx + 1);
-      const y0 = Math.floor(cy - ry - 1);
-      const y1 = Math.ceil(cy + ry + 1);
-
-      for (let py = y0; py <= y1; py++) {
-        for (let px = x0; px <= x1; px++) {
-          const nx = (px - cx) / rx;
-          const ny = (py - cy) / ry;
-          const angle = Math.atan2(ny, nx);
-          const furWave = Math.sin(angle * 9 + seed) * 0.08 + Math.cos(angle * 15 - seed) * 0.05;
-          const d = Math.hypot(nx, ny) - furWave;
-
-          if (d <= 1.08) {
-            let col = '#e69f45'; // Warm golden-ginger base
-            if (d > 0.94) {
-              col = '#381e10'; // Crisp dark pixel-art outline
-            } else if (ny < -0.45 && Math.abs(nx) < 0.45 && (px + py) % 3 === 0) {
-              col = '#b86822'; // Tabby forehead/back stripes
-            } else if (ny > 0.35 && Math.abs(nx) < 0.65) {
-              col = '#fff5e4'; // Creamy white chest/chin fur
-            } else if (ny < -0.25) {
-              col = '#f6c26b'; // Sunlit golden highlight
-            } else if (Math.abs(nx) > 0.68) {
-              col = '#c97a2c'; // Shaded side fur
-            }
-            pxRect(px, py, 1, 1, col);
-          }
-        }
-      }
-    }
-
-    // Helper: draw big fluffy plume tail with dark tip (matching walk1, walk2, sleep1, sleep2)
-    function drawPixelPlumeTail(tx, ty, angleRad, length = 14, thickness = 5) {
-      ctx.save();
-      ctx.translate(Math.round(tx * PX), Math.round(ty * PX));
-      ctx.rotate(angleRad);
-      for (let i = 0; i <= length; i++) {
-        const t = i / length;
-        const r = Math.max(2, Math.round(thickness * Math.sin(t * Math.PI * 0.82 + 0.25)));
-        const wy = Math.round(Math.sin(t * 4) * 1.2);
-        for (let dy = -r - 1; dy <= r + 1; dy++) {
-          const dist = Math.abs(dy);
-          if (dist <= r + 1) {
-            let col = '#e69f45';
-            if (dist === r + 1 || i === length) col = '#381e10'; // Pixel outline
-            else if (t > 0.72) col = '#5c4332'; // Signature dark tail tip
-            else if (t > 0.55) col = '#fae3be'; // Cream gradient band
-            else if (dy < 0) col = '#f7c772';
-            pxRect(i, wy + dy, 1, 1, col);
-          }
-        }
-      }
-      ctx.restore();
-    }
-
-    // Helper: draw pixel cat head (big round dark eyes, folded/perky ears, pink nose, white whiskers)
-    function drawPixelHead(hx, hy, opts = {}) {
-      const { winkLeft = false, closedEyes = false, openSmile = false, foldedEars = false } = opts;
-
-      // Left & Right Ears
-      if (foldedEars) {
-        // Cute folded ears (like sleep1.jpg)
-        pxRect(hx - 11, hy - 7, 5, 3, '#381e10');
-        pxRect(hx - 10, hy - 6, 4, 2, '#d48234');
-        pxRect(hx - 9, hy - 5, 2, 1, '#fff3e0');
-
-        pxRect(hx + 6, hy - 7, 5, 3, '#381e10');
-        pxRect(hx + 6, hy - 6, 4, 2, '#d48234');
-        pxRect(hx + 7, hy - 5, 2, 1, '#fff3e0');
-      } else {
-        // Perky British Longhair ears
-        for (let row = 0; row < 5; row++) {
-          const w = 5 - row;
-          pxRect(hx - 9 + Math.floor(row / 2), hy - 8 - row, w, 1, row === 4 ? '#381e10' : '#d48234');
-          pxRect(hx + 9 - w - Math.floor(row / 2), hy - 8 - row, w, 1, row === 4 ? '#381e10' : '#d48234');
-        }
-        pxRect(hx - 8, hy - 10, 2, 2, '#f9a8b8');
-        pxRect(hx + 6, hy - 10, 2, 2, '#f9a8b8');
-      }
-
-      // Main Fluffy Head
-      drawPixelFluff(hx, hy, 10, 8.5, 1.4);
-
-      // Forehead M-tabby stripes
-      pxRect(hx - 2, hy - 7, 1, 3, '#a85a1c');
-      pxRect(hx, hy - 6, 1, 3, '#a85a1c');
-      pxRect(hx + 2, hy - 7, 1, 3, '#a85a1c');
-
-      // Cream cheeks & muzzle
-      pxRect(hx - 6, hy + 2, 12, 5, '#fff6e8');
-      pxRect(hx - 4, hy + 6, 8, 2, '#fff6e8');
-
-      // Eyes
-      if (closedEyes) {
-        // Happy curved closed eyes (cheer.jpg / sleep1.jpg / sleep2.jpg)
-        pxRect(hx - 6, hy, 4, 1, '#2b160b');
-        pxRect(hx - 7, hy + 1, 1, 1, '#2b160b');
-        pxRect(hx - 2, hy + 1, 1, 1, '#2b160b');
-
-        pxRect(hx + 2, hy, 4, 1, '#2b160b');
-        pxRect(hx + 1, hy + 1, 1, 1, '#2b160b');
-        pxRect(hx + 6, hy + 1, 1, 1, '#2b160b');
-      } else {
-        // Left eye (can wink like stand.jpg!)
-        if (winkLeft) {
-          pxRect(hx - 6, hy, 4, 1, '#2b160b');
-          pxRect(hx - 7, hy - 1, 1, 1, '#2b160b');
-        } else {
-          pxRect(hx - 6, hy - 2, 4, 4, '#141a12');
-          pxRect(hx - 6, hy - 2, 1, 1, '#ffffff'); // Pixel shine
-          pxRect(hx - 3, hy + 1, 1, 1, '#658238'); // Green-gold rim
-        }
-        // Right big round dark eye
-        pxRect(hx + 2, hy - 2, 4, 4, '#141a12');
-        pxRect(hx + 2, hy - 2, 1, 1, '#ffffff'); // Pixel shine
-        pxRect(hx + 5, hy + 1, 1, 1, '#658238');
-      }
-
-      // Pink Nose
-      pxRect(hx - 1, hy + 2, 2, 2, '#f4728c');
-
-      // Mouth
-      if (openSmile) {
-        // Big happy open mouth with pink tongue (cheer.jpg!)
-        pxRect(hx - 3, hy + 4, 6, 1, '#381e10');
-        pxRect(hx - 2, hy + 5, 4, 3, '#e11d48');
-        pxRect(hx - 1, hy + 6, 2, 2, '#fb7185');
-      } else {
-        pxRect(hx - 3, hy + 4, 2, 1, '#5c3419');
-        pxRect(hx + 1, hy + 4, 2, 1, '#5c3419');
-        pxRect(hx - 1, hy + 5, 2, 1, '#5c3419');
-      }
-
-      // White Pixel Whiskers
-      pxRect(hx - 12, hy + 2, 4, 1, '#ffffff');
-      pxRect(hx - 11, hy + 4, 3, 1, '#ffffff');
-      pxRect(hx + 8, hy + 2, 4, 1, '#ffffff');
-      pxRect(hx + 8, hy + 4, 3, 1, '#ffffff');
-    }
-
-    function drawPixelPaw(px, py, showToeBeans = false) {
-      pxRect(px - 2, py - 2, 4, 4, '#381e10');
-      pxRect(px - 1, py - 1, 3, 3, '#fff6e8');
-      if (showToeBeans) {
-        // Cute brown-pink toe beans (cheer.jpg!)
-        pxRect(px - 1, py - 1, 1, 1, '#6b3e26');
-        pxRect(px + 1, py - 1, 1, 1, '#6b3e26');
-        pxRect(px, py, 2, 1, '#6b3e26');
-      }
-    }
-
-    function drawPixelHeart(hx, hy) {
-      const c = '#ef4444';
-      const hi = '#fca5a5';
-      pxRect(hx - 2, hy - 1, 2, 2, c);
-      pxRect(hx + 1, hy - 1, 2, 2, c);
-      pxRect(hx - 2, hy + 1, 5, 1, c);
-      pxRect(hx - 1, hy + 2, 3, 1, c);
-      pxRect(hx, hy + 3, 1, 1, c);
-      pxRect(hx - 2, hy - 1, 1, 1, hi);
-    }
+    function circle(x, y, r, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+    function ellipse(x, y, rx, ry, color, rot = 0) { ctx.fillStyle = color; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); ctx.fill(); }
 
     function renderScene() {
       ctx.clearRect(0, 0, stageW, stageH);
       const fy = getFloorLineY();
 
-      // 1. Cozy Pixel Wall
-      ctx.fillStyle = '#fdf4e3';
-      ctx.fillRect(0, 0, stageW, fy);
-      ctx.fillStyle = '#e5be91';
-      ctx.fillRect(0, fy - 12, stageW, 12);
-      ctx.fillStyle = '#4a2c18';
-      ctx.fillRect(0, fy - 2, stageW, 3);
-
-      // 2. Pixel Sunny Window
-      const winX = Math.max(20, stageW * 0.08);
-      const winY = Math.max(14, fy * 0.14);
-      const winW = Math.min(126, stageW * 0.22);
-      const winH = Math.min(120, fy * 0.56);
-      ctx.fillStyle = '#bae6fd';
-      ctx.fillRect(winX, winY, winW, winH);
-      ctx.strokeStyle = '#4a2c18';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(winX, winY, winW, winH);
-      ctx.fillStyle = '#4a2c18';
-      ctx.fillRect(winX + winW / 2 - 2, winY, 4, winH);
-      ctx.fillRect(winX, winY + winH * 0.55, winW, 4);
-
-      // 3. Pixel Wooden Floorboards
-      ctx.fillStyle = '#dda364';
-      ctx.fillRect(0, fy, stageW, stageH - fy);
-      ctx.fillStyle = '#b97a3d';
-      for (let py = fy + 26; py < stageH; py += 26) {
-        ctx.fillRect(0, py, stageW, 3);
+      // Wall
+      let g = ctx.createLinearGradient(0, 0, 0, fy);
+      g.addColorStop(0, '#fff7ec'); g.addColorStop(1, '#ffead6');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, stageW, fy);
+      ctx.fillStyle = 'rgba(244, 170, 140, 0.16)';
+      for (let y = 20, row = 0; y < fy - 50; y += 32, row++) {
+        for (let x = (row % 2) * 16 + 8; x < stageW; x += 32) { ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2); ctx.fill(); }
       }
+      // Wainscot + baseboard
+      ctx.fillStyle = '#ffe3cb'; ctx.fillRect(0, fy - 44, stageW, 44);
+      ctx.fillStyle = '#f9cfab'; ctx.fillRect(0, fy - 46, stageW, 4);
+      ctx.fillStyle = 'rgba(232, 180, 140, 0.35)';
+      for (let x = 14; x < stageW; x += 28) ctx.fillRect(x, fy - 40, 2, 32);
+      ctx.fillStyle = '#ecb98d'; ctx.fillRect(0, fy - 9, stageW, 9);
 
-      // Soft Oval Pixel Rug
-      const rugX = stageW * 0.5;
-      const rugY = fy + 48;
-      ctx.fillStyle = '#fff8ec';
-      ctx.beginPath();
-      ctx.ellipse(rugX, rugY, Math.min(205, stageW * 0.33), 44, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#c88a4b';
-      ctx.lineWidth = 4;
-      ctx.stroke();
+      drawWindow();
+      drawPhotoFrames();
 
-      // 4. Karaoke Stage Spotlight & Pixel Stand Mic
-      if (karaoke.active) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(253, 224, 71, 0.26)';
-        ctx.beginPath();
-        ctx.arc(stageW * 0.5, fy + 20, 175, 0, Math.PI * 2);
-        ctx.fill();
-
-        const micX = mousse.x + (spritesReady ? currentSpriteInfo().w * 0.5 + 16 : 58);
-        const micY = mousse.y + 8;
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(micX - 14, micY - 4, 28, 6);
-        ctx.fillRect(micX - 2, micY - 76, 4, 74);
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillRect(micX - 10, micY - 82, 12, 10);
-        ctx.restore();
+      // Floor
+      g = ctx.createLinearGradient(0, fy, 0, stageH);
+      g.addColorStop(0, '#f2c99b'); g.addColorStop(1, '#e3ab77');
+      ctx.fillStyle = g; ctx.fillRect(0, fy, stageW, stageH - fy);
+      ctx.fillStyle = 'rgba(176, 110, 60, 0.22)';
+      for (let y = fy + 30, row = 0; y < stageH; y += 30, row++) {
+        ctx.fillRect(0, y, stageW, 2);
+        for (let x = (row % 2) * 90 + 60; x < stageW; x += 180) ctx.fillRect(x, y - 30, 2, 30);
       }
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.fillRect(0, fy, stageW, 6);
 
-      // 5. Pixel Care Props
-      drawPixelProps();
+      // Rug
+      const rugX = stageW * 0.5, rugY = fy + 50, rugRX = Math.min(210, stageW * 0.33);
+      ellipse(rugX, rugY + 4, rugRX, 46, 'rgba(150, 90, 50, 0.12)');
+      ellipse(rugX, rugY, rugRX, 44, '#fff6ec');
+      ctx.save();
+      ctx.strokeStyle = '#f7b7c8'; ctx.lineWidth = 3; ctx.setLineDash([8, 7]);
+      ctx.beginPath(); ctx.ellipse(rugX, rugY, rugRX - 12, 33, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
 
-      // 6. Pixel Mousse Sprite (All 6 Poses!)
-      drawPixelMousse();
+      if (karaoke.active) drawKaraokeStage();
+      drawProps();
 
-      // 7. Pixel Yarn Ball
-      if (ball.active) {
-        drawPixelYarnBall(ball.x, ball.y - ball.z, ball.z, ball.spin);
-      }
+      // Depth: draw ball behind cat if farther back
+      const ballBehind = ball.active && ball.y < mousse.y;
+      if (ballBehind) drawYarnBall(ball.x, ball.y - ball.z, ball.z, ball.spin);
+      drawMousse();
+      if (ball.active && !ballBehind) drawYarnBall(ball.x, ball.y - ball.z, ball.z, ball.spin);
+      if (bug) drawBug();
     }
 
-    function drawPixelProps() {
+    function drawWindow() {
+      const w = getWindowRect();
+      // Curtain rod
+      ctx.fillStyle = '#d99a6c';
+      rr(w.x - 18, w.y - 12, w.w + 36, 6, 3); ctx.fill();
+      circle(w.x - 18, w.y - 9, 5, '#d99a6c'); circle(w.x + w.w + 18, w.y - 9, 5, '#d99a6c');
+
+      // Sky
+      ctx.save();
+      rr(w.x, w.y, w.w, w.h, 12); ctx.clip();
+      const g = ctx.createLinearGradient(0, w.y, 0, w.y + w.h);
+      g.addColorStop(0, '#a9dcff'); g.addColorStop(1, '#e4f5ff');
+      ctx.fillStyle = g; ctx.fillRect(w.x, w.y, w.w, w.h);
+      circle(w.x + w.w * 0.76, w.y + w.h * 0.26, Math.min(16, w.w * 0.12), '#ffe58f');
+      const off = (mousse.time * 8) % (w.w + 80);
+      [[0, 0.32], [0.55, 0.62]].forEach(([o, yy]) => {
+        const cx = w.x - 40 + ((off + o * (w.w + 80)) % (w.w + 80));
+        const cy = w.y + w.h * yy;
+        ctx.fillStyle = '#ffffff';
+        [[0, 0, 11], [12, -5, 13], [25, 0, 10], [12, 4, 10]].forEach(([dx, dy, r]) => { ctx.beginPath(); ctx.arc(cx + dx, cy + dy, r, 0, Math.PI * 2); ctx.fill(); });
+      });
+      ctx.fillStyle = '#bfe6a8'; ctx.beginPath(); ctx.ellipse(w.x + w.w * 0.3, w.y + w.h + 6, w.w * 0.6, 26, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      // Frame
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 7;
+      rr(w.x, w.y, w.w, w.h, 12); ctx.stroke();
+      ctx.strokeStyle = '#eac3a0'; ctx.lineWidth = 2;
+      rr(w.x - 4, w.y - 4, w.w + 8, w.h + 8, 15); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(w.x + w.w / 2 - 2.5, w.y, 5, w.h);
+      ctx.fillRect(w.x, w.y + w.h * 0.52 - 2.5, w.w, 5);
+      // Sill
+      ctx.fillStyle = '#f6d9bd'; rr(w.x - 12, w.y + w.h + 2, w.w + 24, 10, 5); ctx.fill();
+
+      // Curtains
+      const cw = Math.max(18, w.w * 0.2);
+      [[w.x - 14, 1], [w.x + w.w + 14, -1]].forEach(([x0, s]) => {
+        ctx.fillStyle = '#ffc9d6';
+        ctx.beginPath();
+        ctx.moveTo(x0, w.y - 9);
+        ctx.lineTo(x0 + s * cw, w.y - 9);
+        ctx.quadraticCurveTo(x0 + s * cw * 0.35, w.y + w.h * 0.55, x0 + s * cw * 0.7, w.y + w.h + 10);
+        ctx.lineTo(x0, w.y + w.h + 10);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(240, 150, 175, 0.6)'; ctx.lineWidth = 1.5;
+        for (let i = 1; i < 3; i++) {
+          ctx.beginPath(); ctx.moveTo(x0 + s * cw * 0.28 * i, w.y - 6);
+          ctx.lineTo(x0 + s * cw * 0.22 * i, w.y + w.h + 6); ctx.stroke();
+        }
+        circle(x0 + s * cw * 0.33, w.y + w.h * 0.58, 4, '#f7a5bb');
+      });
+    }
+
+    function drawPhotoFrames() {
+      getFrameLayout().forEach(f => {
+        ctx.save();
+        ctx.translate(f.x + f.w / 2, f.y + f.h / 2);
+        ctx.rotate(f.tilt + Math.sin(mousse.time * 0.8 + f.x) * 0.006);
+        // Shadow + white mat frame
+        ctx.fillStyle = 'rgba(150, 95, 55, 0.18)';
+        rr(-f.w / 2 + 3, -f.h / 2 + 5, f.w, f.h, 10); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        rr(-f.w / 2, -f.h / 2, f.w, f.h, 10); ctx.fill();
+        ctx.strokeStyle = '#f0d3b8'; ctx.lineWidth = 2; ctx.stroke();
+        const pad = 6;
+        const iw = f.w - pad * 2, ih = f.h - pad * 2 - 8;
+        ctx.save();
+        rr(-iw / 2, -f.h / 2 + pad, iw, ih, 7); ctx.clip();
+        ctx.fillStyle = f.bg; ctx.fillRect(-iw / 2, -f.h / 2 + pad, iw, ih);
+        if (f.p.ready) {
+          const c = f.p.crop;
+          const s = Math.min(iw / c[2], ih / c[3]) * 1.04;
+          const dw = c[2] * s, dh = c[3] * s;
+          ctx.drawImage(f.p.img, c[0], c[1], c[2], c[3], -dw / 2, -f.h / 2 + pad + ih - dh, dw, dh);
+        }
+        ctx.restore();
+        // Little heart at the bottom of the mat
+        ctx.fillStyle = '#f7a5bb';
+        drawHeartPath(0, f.h / 2 - 7, 3.2); ctx.fill();
+        // Washi tape
+        ctx.fillStyle = ['rgba(255,190,205,0.85)', 'rgba(170,215,255,0.85)', 'rgba(255,225,140,0.85)', 'rgba(180,230,190,0.85)'][FRAME_BG.indexOf(f.bg)];
+        ctx.rotate(-0.12);
+        ctx.fillRect(-14, -f.h / 2 - 7, 28, 12);
+        ctx.restore();
+      });
+    }
+
+    function drawHeartPath(x, y, s) {
+      ctx.beginPath();
+      ctx.moveTo(x, y + s * 1.2);
+      ctx.bezierCurveTo(x - s * 2.2, y - s * 0.4, x - s * 1.1, y - s * 1.9, x, y - s * 0.7);
+      ctx.bezierCurveTo(x + s * 1.1, y - s * 1.9, x + s * 2.2, y - s * 0.4, x, y + s * 1.2);
+      ctx.closePath();
+    }
+
+    function drawKaraokeStage() {
+      const fy = getFloorLineY();
+      const g = ctx.createRadialGradient(stageW * 0.5, fy + 30, 10, stageW * 0.5, fy + 30, 190);
+      g.addColorStop(0, 'rgba(255, 236, 140, 0.45)'); g.addColorStop(1, 'rgba(255, 236, 140, 0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, stageW, stageH);
+      const micX = mousse.x + currentSpriteInfo().w * 0.5 + 16, micY = mousse.y + 8;
+      ellipse(micX, micY, 15, 5, '#6b5b73');
+      ctx.fillStyle = '#6b5b73'; rr(micX - 2, micY - 78, 4, 78, 2); ctx.fill();
+      ctx.fillStyle = '#d9d2e9'; rr(micX - 8, micY - 94, 16, 20, 8); ctx.fill();
+      ctx.strokeStyle = '#a99cbf'; ctx.lineWidth = 1;
+      for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(micX - 7, micY - 89 + i * 5); ctx.lineTo(micX + 7, micY - 89 + i * 5); ctx.stroke(); }
+    }
+
+    function drawProps() {
       const props = getPropsCoords();
 
-      // Water Fountain
+      // Water fountain
       ctx.save();
       ctx.translate(props.water.x, props.water.y);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-22, -22, 44, 28);
-      ctx.strokeStyle = '#4a2c18';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(-22, -22, 44, 28);
-      ctx.fillStyle = state.fountainWater > 0.2 ? '#38bdf8' : '#cbd5e1';
-      ctx.fillRect(-18, -20, 36, 7);
-      ctx.fillRect(-4, -29, 8, 9);
+      ellipse(0, 8, 28, 6, 'rgba(150, 90, 50, 0.15)');
+      ctx.fillStyle = '#ffffff'; rr(-25, -26, 50, 32, 14); ctx.fill();
+      ctx.strokeStyle = '#bfe3f7'; ctx.lineWidth = 2.5; ctx.stroke();
+      const hasWater = state.fountainWater > 0.2;
+      ellipse(0, -24, 20, 6, hasWater ? '#7cc9f2' : '#dbe6ee');
+      ellipse(-6, -25, 6, 2, 'rgba(255,255,255,0.7)');
+      if (hasWater) {
+        const t = mousse.time * 3;
+        for (let i = 0; i < 3; i++) {
+          const p = (t + i / 3) % 1;
+          circle(Math.sin(i * 2) * 6, -34 - Math.sin(p * Math.PI) * 10, 2, 'rgba(124, 201, 242, ' + (1 - p) + ')');
+        }
+      }
+      // Flower on fountain
+      for (let i = 0; i < 5; i++) {
+        const a = i * Math.PI * 2 / 5;
+        circle(Math.cos(a) * 4, -34 + Math.sin(a) * 4, 3.4, '#ffb3c7');
+      }
+      circle(0, -34, 2.6, '#ffe08a');
       ctx.restore();
 
-      // Orange Food Bowl
+      // Food bowl
       ctx.save();
       ctx.translate(props.food.x, props.food.y);
-      ctx.fillStyle = '#f97316';
-      ctx.fillRect(-22, -6, 44, 15);
-      ctx.strokeStyle = '#4a2c18';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(-22, -6, 44, 15);
+      ellipse(0, 10, 28, 6, 'rgba(150, 90, 50, 0.15)');
+      ctx.fillStyle = '#ffb08a';
+      ctx.beginPath();
+      ctx.moveTo(-26, -6); ctx.lineTo(26, -6);
+      ctx.quadraticCurveTo(22, 10, 14, 11); ctx.lineTo(-14, 11);
+      ctx.quadraticCurveTo(-22, 10, -26, -6); ctx.closePath(); ctx.fill();
+      ellipse(0, -6, 26, 6, '#ff9a72');
+      // Paw print on bowl
+      circle(0, 3, 3.2, '#fff4ec');
+      circle(-4, -1.5, 1.5, '#fff4ec'); circle(0, -3, 1.5, '#fff4ec'); circle(4, -1.5, 1.5, '#fff4ec');
       if (state.bowlFood > 0.05) {
-        ctx.fillStyle = state.bowlType === 'wet' ? '#9a3412' : '#78350f';
-        const fw = Math.max(8, Math.round(34 * state.bowlFood));
-        ctx.fillRect(-fw / 2, -11, fw, 5);
-      }
-      ctx.restore();
-
-      // Tofu Litter Box
-      ctx.save();
-      ctx.translate(props.litter.x, props.litter.y);
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillRect(-46, -28, 92, 40);
-      ctx.strokeStyle = '#4a2c18';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(-46, -28, 92, 40);
-      ctx.fillStyle = '#fef3c7';
-      ctx.fillRect(-42, -6, 84, 14);
-      if (state.poopCount > 0) {
-        ctx.fillStyle = '#78350f';
-        for (let i = 0; i < state.poopCount; i++) {
-          ctx.fillRect(-24 + i * 14, -8, 9, 7);
+        if (state.bowlType === 'wet') {
+          ellipse(0, -8, 16 * state.bowlFood + 4, 5 * state.bowlFood + 2, '#c2603a');
+        } else {
+          const n = Math.round(14 * state.bowlFood);
+          for (let i = 0; i < n; i++) circle(-14 + (i * 7.3) % 28, -8 - (i % 3) * 2, 3, i % 2 ? '#b9763f' : '#a5652f');
         }
       }
       ctx.restore();
+
+      // Litter box
+      ctx.save();
+      ctx.translate(props.litter.x, props.litter.y);
+      ellipse(0, 14, 50, 7, 'rgba(150, 90, 50, 0.15)');
+      ctx.fillStyle = '#bfe9d7'; rr(-48, -26, 96, 40, 14); ctx.fill();
+      ctx.strokeStyle = '#94d4ba'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = '#fff1cf'; rr(-41, -24, 82, 12, 6); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.6)'; rr(-40, -4, 20, 4, 2); ctx.fill();
+      for (let i = 0; i < state.poopCount; i++) {
+        const px = -24 + i * 15, py = -20;
+        ellipse(px, py + 3, 6, 3, '#9a5b2e');
+        ellipse(px, py, 4.5, 2.6, '#a86634');
+        ellipse(px + 0.5, py - 2.5, 2.6, 2, '#b4703b');
+      }
+      ctx.restore();
     }
 
-    /**
-     * ============================================================================
-     * H2. IMAGE SPRITES (pixel-art PNGs in the same folder as this file)
-     * ============================================================================
-     * All sprites face RIGHT. crop = non-transparent bounding box [x, y, w, h].
-     * h = display height relative to the base cat size.
-     */
-    const SPRITE_PATH = ''; // e.g. 'img/' if you move the PNGs into a folder
+    function drawYarnBall(bx, by, zHeight, spin, scale = 1) {
+      ctx.save();
+      if (zHeight > 0) ellipse(bx, by + zHeight + 10, 13 * scale, 4.5 * scale, 'rgba(150, 90, 50, 0.2)');
+      ctx.translate(bx, by);
+      ctx.scale(scale, scale);
+      ctx.rotate(spin);
+      circle(0, 0, 12, '#ff8fab');
+      ctx.strokeStyle = '#ffd1dc'; ctx.lineWidth = 2;
+      [[-0.6, 8], [0.4, 10], [1.3, 7]].forEach(([a, r]) => {
+        ctx.beginPath(); ctx.arc(0, 0, r, a, a + 2.2); ctx.stroke();
+      });
+      ctx.strokeStyle = '#ff8fab'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(10, 6); ctx.quadraticCurveTo(18, 14, 24, 8); ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBug() {
+      const s = Math.max(0.9, Math.min(1.4, stageH / 520));
+      const flutterY = bug.state === 'caught' ? 0 : Math.sin(bug.t * 5) * 6;
+      ctx.save();
+      ctx.translate(bug.x, bug.y + flutterY);
+      ctx.scale(bug.face * s, s);
+      const id = bug.type.id;
+      const flap = 0.25 + 0.75 * Math.abs(Math.sin(bug.t * (id === 'dragonfly' ? 28 : 14)));
+
+      if (id === 'butterfly') {
+        const [c1, c2] = bug.colors;
+        ctx.rotate(0.25);
+        [-1, 1].forEach(side => {
+          ctx.save();
+          ctx.scale(side * flap, 1);
+          ellipse(7, -4, 8, 7, c1, 0.5);
+          ellipse(7, -4, 4, 3.5, c2, 0.5);
+          ellipse(5, 5, 6, 5, c1, -0.4);
+          circle(5, 5, 2, '#ffffff');
+          ctx.restore();
+        });
+        ellipse(0, 0, 1.8, 8, '#6b4226');
+        ctx.strokeStyle = '#6b4226'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, -7); ctx.quadraticCurveTo(-3, -13, -5, -14); ctx.moveTo(0, -7); ctx.quadraticCurveTo(3, -13, 5, -14); ctx.stroke();
+        circle(-5, -14, 1.3, '#6b4226'); circle(5, -14, 1.3, '#6b4226');
+      } else if (id === 'ladybug') {
+        ctx.save(); ctx.scale(1, flap);
+        ellipse(-5, -8, 7, 4, 'rgba(255,255,255,0.75)', -0.5);
+        ellipse(5, -8, 7, 4, 'rgba(255,255,255,0.75)', 0.5);
+        ctx.restore();
+        circle(7, 0, 4, '#4a3a3a');
+        circle(8.5, -1, 1, '#ffffff');
+        circle(0, 0, 7.5, '#f05a5a');
+        ctx.fillStyle = '#4a3a3a'; ctx.fillRect(-0.6, -7.5, 1.2, 15);
+        circle(-3.5, -3, 1.6, '#4a3a3a'); circle(3, -3.5, 1.6, '#4a3a3a');
+        circle(-3, 3, 1.6, '#4a3a3a'); circle(3.5, 3, 1.6, '#4a3a3a');
+        ellipse(-2, -4.5, 2, 1, 'rgba(255,255,255,0.6)');
+      } else {
+        ctx.save(); ctx.scale(1, flap);
+        ['rgba(200,235,255,0.8)', 'rgba(200,235,255,0.65)'].forEach((c, i) => {
+          ellipse(-2 - i * 4, -6, 9, 2.6, c, -0.25 + i * 0.15);
+          ellipse(-2 - i * 4, 6, 9, 2.6, c, 0.25 - i * 0.15);
+        });
+        ctx.restore();
+        ctx.fillStyle = '#3fb8a8'; rr(-16, -1.6, 20, 3.2, 1.6); ctx.fill();
+        circle(5, 0, 3.6, '#2f9c8e');
+        circle(6.2, -1.6, 1.6, '#ffffff'); circle(6.2, 1.6, 1.6, '#ffffff');
+        circle(6.6, -1.6, 0.8, '#2b2b2b'); circle(6.6, 1.6, 0.8, '#2b2b2b');
+      }
+      ctx.restore();
+
+      // Little sparkle trail so it's easy to spot & tap
+      if (bug.state === 'flying' || bug.state === 'escaping') {
+        const a = 0.35 + 0.35 * Math.sin(bug.t * 6);
+        ctx.fillStyle = `rgba(255, 230, 120, ${a})`;
+        ctx.beginPath(); ctx.arc(bug.x - bug.face * 14, bug.y + flutterY + 6, 2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    /* ==========================================================================
+     * M. MOUSSE SPRITES (PNG images, all facing RIGHT)
+     * ========================================================================== */
     const SPRITES = {
       stand:  { file: 'stand.png',  crop: [14, 18, 402, 554], h: 1.00 },
       walk1:  { file: 'walk1.png',  crop: [7, 10, 474, 498],  h: 0.92 },
@@ -1723,36 +1941,28 @@
     };
     let spritesReady = false;
 
-    function loadSprites() {
+    (function loadSprites() {
       const keys = Object.keys(SPRITES);
-      let loaded = 0, failed = false;
+      let loaded = 0;
       keys.forEach(k => {
         const img = new Image();
-        img.onload = () => {
-          loaded++;
-          if (loaded === keys.length && !failed) spritesReady = true;
-        };
-        img.onerror = () => { failed = true; }; // falls back to drawn cat
-        img.src = SPRITE_PATH + SPRITES[k].file;
+        img.onload = () => { if (++loaded === keys.length) spritesReady = true; };
+        img.src = SPRITES[k].file;
         SPRITES[k].img = img;
       });
-    }
-    loadSprites();
+    })();
 
-    // Base cat height on screen (scales with room size)
-    function catBaseH() {
-      return Math.max(96, Math.min(160, stageH * 0.27));
-    }
+    function catBaseH() { return Math.max(96, Math.min(160, stageH * 0.27)); }
 
-    // Current sprite key + on-screen height, used by drawing, hit test & bubble
+    const MOVING_MODES = ['going_eat', 'going_drink', 'going_litter', 'chasing', 'returning_ball', 'walking_out', 'returning_gift', 'hunting'];
+
     function currentSpriteInfo() {
       const m = mousse.mode;
       let key = 'stand';
       if (m === 'sleeping') key = mousse.sleepStyle === 1 ? 'sleep1' : 'sleep2';
-      else if (m === 'cheer' || m === 'karaoke') key = 'cheer';
-      else if (['going_eat', 'going_drink', 'going_litter', 'chasing', 'returning_ball', 'walking_out', 'returning_gift'].includes(m)) {
-        key = Math.floor(mousse.walkPhase / Math.PI) % 2 === 0 ? 'walk1' : 'walk2';
-      } else if (m === 'eating' || m === 'drinking') key = 'walk2';
+      else if (m === 'cheer' || m === 'karaoke' || m === 'pounce' || m === 'offering') key = 'cheer';
+      else if (MOVING_MODES.includes(m)) key = Math.floor(mousse.walkPhase / Math.PI) % 2 === 0 ? 'walk1' : 'walk2';
+      else if (m === 'eating' || m === 'drinking') key = 'walk2';
       else if (m === 'digging') key = Math.floor(mousse.time * 7) % 2 === 0 ? 'walk1' : 'walk2';
       const s = SPRITES[key];
       const h = catBaseH() * s.h;
@@ -1760,215 +1970,74 @@
       return { key, s, w, h };
     }
 
-    function drawSpriteMousse() {
+    function drawMousse() {
+      if (mousse.mode === 'away') return;
       const { key, s, w, h } = currentSpriteInfo();
       const m = mousse.mode;
-      const footY = 12; // sprite bottom sits on the shadow
+      const footY = 12;
 
       ctx.save();
       ctx.translate(Math.round(mousse.x), Math.round(mousse.y));
 
-      // Ground shadow
-      ctx.fillStyle = 'rgba(74, 44, 24, 0.22)';
-      ctx.beginPath();
-      ctx.ellipse(0, footY - 2, w * 0.42, Math.max(8, h * 0.07), 0, 0, Math.PI * 2);
-      ctx.fill();
+      ellipse(0, footY - 2, w * 0.42, Math.max(8, h * 0.07), 'rgba(150, 90, 50, 0.2)');
 
-      // Motion: bob / hop / breathe
       let dy = 0, sx = 1, sy = 1;
-      if (key === 'walk1' || key === 'walk2') {
-        if (m === 'eating' || m === 'drinking') dy = Math.sin(mousse.time * 14) * 1.5;
-        else dy = -Math.abs(Math.sin(mousse.walkPhase)) * 4;
+      if (m === 'pounce') {
+        const p = 1 - Math.max(0, mousse.timer) / 0.75;
+        dy = -Math.sin(p * Math.PI) * h * 0.38;
+      } else if (key === 'walk1' || key === 'walk2') {
+        dy = (m === 'eating' || m === 'drinking') ? Math.sin(mousse.time * 14) * 1.5 : -Math.abs(Math.sin(mousse.walkPhase)) * 4;
       } else if (key === 'cheer') {
         dy = -Math.abs(Math.sin(mousse.time * 6)) * 7;
       } else if (key === 'stand') {
         sy = 1 + Math.sin(mousse.time * 2.4) * 0.012;
+        if (m === 'landing') sy = 0.94;
       } else {
         const b = Math.sin(mousse.time * 2.2);
-        sy = 1 + b * 0.025;
-        sx = 1 - b * 0.008;
+        sy = 1 + b * 0.025; sx = 1 - b * 0.008;
       }
 
-      // Sprites face right; flip when moving left (not for front-facing poses)
       const flip = (key === 'walk1' || key === 'walk2') && mousse.facing < 0 ? -1 : 1;
-
       ctx.translate(0, footY + dy);
-      ctx.scale(flip * sx, sy);
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      const c = s.crop;
-      ctx.drawImage(s.img, c[0], c[1], c[2], c[3], Math.round(-w / 2), Math.round(-h), Math.round(w), Math.round(h));
-      ctx.imageSmoothingEnabled = false;
 
-      // Carried items near the mouth (sprite faces right before flip)
-      if (mousse.carryingBall) {
+      if (spritesReady) {
         ctx.save();
-        ctx.scale(flip, 1); // keep ball unflipped
-        drawPixelYarnBall(flip * w * 0.42, -h * 0.42, 0, 0, Math.max(0.6, h / 170));
+        ctx.scale(flip * sx, sy);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        const c = s.crop;
+        ctx.drawImage(s.img, c[0], c[1], c[2], c[3], -w / 2, -h, w, h);
         ctx.restore();
-      } else if (mousse.carryingGift) {
-        ctx.save();
-        ctx.scale(flip, 1);
-        ctx.font = Math.round(h * 0.2) + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(mousse.carryingGift.icon, flip * w * 0.44, -h * 0.4);
-        ctx.restore();
-      }
-      ctx.restore();
-    }
-
-    function drawPixelMousse() {
-      if (mousse.mode === 'away') return;
-      if (spritesReady) { drawSpriteMousse(); return; }
-      drawProceduralMousse();
-    }
-
-    // Fallback: original code-drawn cat (used only if PNGs fail to load)
-    function drawProceduralMousse() {
-
-      ctx.save();
-      ctx.translate(Math.round(mousse.x), Math.round(mousse.y));
-
-      // Ground pixel shadow
-      ctx.fillStyle = 'rgba(74, 44, 24, 0.25)';
-      ctx.beginPath();
-      ctx.ellipse(0, 12, mousse.mode === 'sleeping' ? 76 : 48, 11, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // POSE A: SLEEPING (sleep1.jpg Sploot OR sleep2.jpg Cinnamon Roll)
-      if (mousse.mode === 'sleeping') {
-        const breath = Math.sin(mousse.time * 2.2) * 0.6;
-        if (mousse.sleepStyle === 1) {
-          // sleep1.jpg: Flattened "melted butter" sploot on wooden floor
-          drawPixelPlumeTail(-12, -1, -2.9 + Math.sin(mousse.time * 1.5) * 0.08, 12, 4.5);
-          drawPixelFluff(-3, -4 - breath, 12, 6.5 + breath, 2.1);
-          drawPixelPaw(-9, 1);
-          drawPixelPaw(4, 2);
-          drawPixelPaw(15, 2);
-          drawPixelHead(10, -3 - breath, { closedEyes: true, foldedEars: true });
-        } else {
-          // sleep2.jpg: Curled up round cinnamon-roll ball wrapped in fluffy tail
-          drawPixelFluff(0, -6 - breath, 13, 10 + breath, 3.3);
-          drawPixelHead(4, -6 - breath, { closedEyes: true, foldedEars: false });
-          drawPixelPlumeTail(-11, -1, -0.1, 22, 4.5);
-        }
-        ctx.restore();
-        return;
-      }
-
-      // POSE B: CHEER / KARAOKE (cheer.jpg: Standing upright with both front paws raised showing toe beans & floating pixel hearts!)
-      if (mousse.mode === 'cheer' || mousse.mode === 'karaoke') {
-        const hop = Math.abs(Math.sin(mousse.time * 6)) * 2.2;
-        ctx.translate(0, -Math.round(hop * PX));
-
-        // Tail wagging behind
-        drawPixelPlumeTail(-7, -4, -2.1 + Math.sin(mousse.tailPhase) * 0.25, 13, 4.2);
-
-        // Chubby standing fluffy torso with white belly
-        drawPixelFluff(0, -10, 9.5, 10, 0.8);
-
-        // Bottom feet
-        drawPixelPaw(-5, 1);
-        drawPixelPaw(5, 1);
-
-        // Raised front paws showing cute brown toe beans!
-        const wave = Math.sin(mousse.time * 8) * 1.2;
-        drawPixelPaw(-11, -15 - wave, true);
-        drawPixelPaw(11, -15 + wave, true);
-
-        // Happy open-mouth smiling head
-        drawPixelHead(0, -24, { closedEyes: true, openSmile: true });
-
-        // Floating red pixel hearts around Mousse (like cheer.jpg)
-        const hFloat = Math.sin(mousse.time * 4) * 2;
-        drawPixelHeart(-15, -28 + hFloat);
-        drawPixelHeart(15, -30 - hFloat);
-        drawPixelHeart(-9, -37 - hFloat);
-        drawPixelHeart(10, -38 + hFloat);
-
-        ctx.restore();
-        return;
-      }
-
-      // POSE C: WALKING / CHASING / EATING / DRINKING / SITTING WINK (walk1, walk2, stand)
-      const isMoving = ['going_eat', 'going_drink', 'going_litter', 'chasing', 'returning_ball', 'walking_out', 'returning_gift'].includes(mousse.mode);
-      const isHeadDown = mousse.mode === 'eating' || mousse.mode === 'drinking';
-
-      ctx.scale(mousse.facing, 1);
-      if (isMoving) {
-        const bounce = Math.abs(Math.sin(mousse.walkPhase)) * 1.8;
-        ctx.translate(0, -Math.round(bounce * PX));
-      }
-
-      if (isMoving || isHeadDown) {
-        // Side-profile walking / eating body (walk1.jpg & walk2.jpg)
-        const tailAngle = mousse.mode === 'chasing' ? -1.3 : -1.8 + Math.sin(mousse.tailPhase) * 0.25;
-        drawPixelPlumeTail(-10, -9, tailAngle, 14, 4.5);
-
-        const stride = isMoving ? Math.sin(mousse.walkPhase) * 3 : 0;
-        drawPixelPaw(-7 - stride, 1);
-        drawPixelPaw(-2 + stride, 1);
-        drawPixelFluff(0, -8, 11.5, 7.5, 1.9);
-        drawPixelPaw(5 - stride, 1);
-        drawPixelPaw(9 + stride, 1);
-
-        const headX = isHeadDown ? 13 : 9;
-        const headY = isHeadDown ? -8 + Math.sin(mousse.time * 14) * 1.2 : -16;
-        drawPixelHead(headX, headY, { closedEyes: isHeadDown });
-
-        if (mousse.carryingBall) {
-          drawPixelYarnBall(18 * PX, -3 * PX, 0, 0, 0.72);
-        } else if (mousse.carryingGift) {
-          ctx.font = '22px sans-serif';
-          ctx.fillText(mousse.carryingGift.icon, 14 * PX, -2 * PX);
-        }
       } else {
-        // Cute sitting wink pose (stand.jpg!)
-        drawPixelPlumeTail(-8, -3, -2.5 + Math.sin(mousse.tailPhase) * 0.2, 13, 4.5);
-        drawPixelFluff(0, -10, 9.5, 9.5, 0.5);
-        drawPixelPaw(-5, 1);
-        drawPixelPaw(5, 1);
-        // Front paws tucked cutely on chest
-        drawPixelPaw(-3, -9);
-        drawPixelPaw(4, -9);
-
-        const wink = mousse.happyEyes > 0.5 || mousse.isBlinking || Math.sin(mousse.time * 0.9) > 0.72;
-        drawPixelHead(0, -23, { winkLeft: wink });
+        ctx.font = Math.round(h * 0.7) + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🐱', 0, -h * 0.15);
       }
 
+      // "!" when noticing a bug
+      if (m === 'noticing') {
+        const by = -h - 16 - Math.abs(Math.sin(mousse.time * 10)) * 4;
+        circle(w * 0.2, by, 11, '#ffe08a');
+        ctx.fillStyle = '#c2410c';
+        ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('!', w * 0.2, by + 1);
+        ctx.textBaseline = 'alphabetic';
+      }
+
+      if (mousse.carryingBall) {
+        drawYarnBall(flip * w * 0.42, -h * 0.42, 0, 0, Math.max(0.6, h / 170));
+      } else if (mousse.carryingGift) {
+        ctx.font = Math.round(h * 0.22) + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎁', (key === 'cheer' ? 0 : flip * w * 0.44), key === 'cheer' ? -h * 0.72 : -h * 0.38);
+      }
       ctx.restore();
     }
 
-    function drawPixelYarnBall(bx, by, zHeight, spinAngle, scale = 1) {
-      ctx.save();
-      if (zHeight > 0) {
-        ctx.fillStyle = 'rgba(74, 44, 24, 0.22)';
-        ctx.beginPath();
-        ctx.ellipse(bx, by + zHeight + 10, 14 * scale, 5 * scale, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.translate(bx, by);
-      ctx.scale(scale, scale);
-      ctx.rotate(spinAngle);
-
-      ctx.fillStyle = '#f43f5e';
-      ctx.fillRect(-12, -12, 24, 24);
-      ctx.strokeStyle = '#4a2c18';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(-12, -12, 24, 24);
-      ctx.fillStyle = '#fecdd3';
-      ctx.fillRect(-8, -6, 14, 3);
-      ctx.fillRect(-6, 2, 12, 3);
-      ctx.restore();
-    }
-
-    /**
-     * ============================================================================
-     * I. MAIN ENTRYPOINT
-     * ============================================================================
-     */
+    /* ==========================================================================
+     * N. MAIN LOOP
+     * ========================================================================== */
     let lastFrameTime = performance.now();
-
     function mainLoop(now) {
       const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
       lastFrameTime = now;
@@ -1978,11 +2047,17 @@
     }
 
     window.onload = function () {
-      loadSavedData();
+      const awayMin = loadSavedData();
       resizeStage();
       mousse.x = stageW * 0.5;
       mousse.y = getFloorLineY() + 46;
       refreshHudUI();
+      if (awayMin > 10) {
+        const t = awayMin > 120 ? `${Math.round(awayMin / 60)} 個小時` : `${Math.round(awayMin)} 分鐘`;
+        setSpeech(`你回來啦！暮斯等了你 ${t}喵～ 💕`, 5);
+        playMeow(600, 0.3, 0.1);
+      }
+      saveData();
       requestAnimationFrame(mainLoop);
     };
   </script>
